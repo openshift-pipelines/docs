@@ -2,5 +2,5 @@
 :toc: left
 :toclevels: 5
 
-Unofficial documentation for OpenShift Pipelines maintained by the
+__Unofficial__ documentation for OpenShift Pipelines maintained by the
 engineers working on the project.
