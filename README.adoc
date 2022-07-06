@@ -5,4 +5,15 @@
 __Unofficial__ documentation for OpenShift Pipelines maintained by the
 engineers working on the project.
 
-- xref:auth.adoc[Authentication practices with Tekton]
+== The Operator
+
+== Pipeline
+
+- xref:pipeline/auth.adoc[Authentication practices with Tekton]
+- xref:pipeline/hardened.doc[Hardened your Pipelines and Tasks]
+
+== Triggers
+
+== Chains
+
+== Pipeline as code
