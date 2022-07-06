@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 5
 :docinfo: shared
+:docinfodir: common
 
 __Unofficial__ documentation for OpenShift Pipelines maintained by the
 engineers working on the project.
