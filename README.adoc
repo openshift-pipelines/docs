@@ -5,15 +5,15 @@
 __Unofficial__ documentation for OpenShift Pipelines maintained by the
 engineers working on the project.
 
-== The Operator
+== The Operator xref:operator/index.adoc[➡]
 
-== Pipeline
+== Pipeline xref:pipeline/index.adoc[➡]
 
 - xref:pipeline/auth.adoc[Authentication practices with Tekton]
 - xref:pipeline/hardened.doc[Hardened your Pipelines and Tasks]
 
-== Triggers
+== Triggers xref:triggers/index.adoc[➡]
 
-== Chains
+== Chains xref:chains/index.adoc[➡]
 
-== Pipeline as code
+== Pipeline as code xref:pac/index.adoc[➡]
