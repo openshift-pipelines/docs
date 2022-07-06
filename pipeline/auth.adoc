@@ -2,6 +2,8 @@
 :toc: left
 :toclevels: 5
 :source-highlighter: rouge
+:docinfo: shared
+:docinfodir: ../
 
 The __upstream__ official documentation around authentication is available https://tekton.dev/docs/pipelines/auth/[here]. It mainly focus on authenticating through annotated secrets and service accounts. This document will try to explore the different way to use "secrets" for authentication in your ``Pipeline`` and ``Task``.
 
