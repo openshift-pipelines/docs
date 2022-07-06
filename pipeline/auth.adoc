@@ -1,6 +1,7 @@
 = Authentication practices with Tekton
 :toc: left
 :toclevels: 5
+:source-highlighter: rouge
 
 The __upstream__ official documentation around authentication is available https://tekton.dev/docs/pipelines/auth/[here]. It mainly focus on authenticating through annotated secrets and service accounts. This document will try to explore the different way to use "secrets" for authentication in your ``Pipeline`` and ``Task``.
 
@@ -18,14 +19,12 @@ The general idea behind this approach is:
 
 We'll take the example with a very simple `git-clone` Task, as well as a very simple `docker build`, but it can apply to anything else.
 
-=== Without optional workspaces
-
-=== `git-clone`
+=== A git clone example
 
 For this example, we assume we are using `git` with `ssh` to authenticate. Later in the document, we will show different approaches.
 
 [source,yaml]
----
+----
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
@@ -34,7 +33,7 @@ spec:
   workspaces:
     - name: output
       description: The git repo will be cloned onto the volume backing this Workspace.
-    - name: ssh-directory
+    - name: ssh-directory # (1)
       description: |
         A .ssh directory with private key, known_hosts, config, etc. Copied to
         the user's home before git commands are executed. Used to authenticate
@@ -52,12 +51,6 @@ spec:
       description: The image providing the git-init binary that this Task runs.
       type: string
       default: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.37.0"
-    - name: userHome
-      description: |
-        Absolute path to the user's home directory. Set this explicitly if you are running the image as a non-root user or have overridden
-        the gitInitImage param with an image containing custom user configuration.
-      type: string
-      default: "/tekton/home"
   results:
     - name: commit
       description: The precise commit SHA that was fetched by this Task.
@@ -66,115 +59,20 @@ spec:
   steps:
     - name: clone
       image: "$(params.gitInitImage)"
-      env:
-      - name: HOME
-        value: "$(params.userHome)"
-      - name: PARAM_URL
-        value: $(params.url)
-      - name: PARAM_REVISION
-        value: $(params.revision)
-      - name: PARAM_REFSPEC
-        value: $(params.refspec)
-      - name: PARAM_SUBMODULES
-        value: $(params.submodules)
-      - name: PARAM_DEPTH
-        value: $(params.depth)
-      - name: PARAM_SSL_VERIFY
-        value: $(params.sslVerify)
-      - name: PARAM_CRT_FILENAME
-        value: $(params.crtFileName)
-      - name: PARAM_SUBDIRECTORY
-        value: $(params.subdirectory)
-      - name: PARAM_DELETE_EXISTING
-        value: $(params.deleteExisting)
-      - name: PARAM_HTTP_PROXY
-        value: $(params.httpProxy)
-      - name: PARAM_HTTPS_PROXY
-        value: $(params.httpsProxy)
-      - name: PARAM_NO_PROXY
-        value: $(params.noProxy)
-      - name: PARAM_VERBOSE
-        value: $(params.verbose)
-      - name: PARAM_SPARSE_CHECKOUT_DIRECTORIES
-        value: $(params.sparseCheckoutDirectories)
-      - name: PARAM_USER_HOME
-        value: $(params.userHome)
-      - name: WORKSPACE_OUTPUT_PATH
-        value: $(workspaces.output.path)
-      - name: WORKSPACE_SSH_DIRECTORY_BOUND
-        value: $(workspaces.ssh-directory.bound)
-      - name: WORKSPACE_SSH_DIRECTORY_PATH
-        value: $(workspaces.ssh-directory.path)
-      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND
-        value: $(workspaces.basic-auth.bound)
-      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_PATH
-        value: $(workspaces.basic-auth.path)
-      - name: WORKSPACE_SSL_CA_DIRECTORY_BOUND
-        value: $(workspaces.ssl-ca-directory.bound)
-      - name: WORKSPACE_SSL_CA_DIRECTORY_PATH
-        value: $(workspaces.ssl-ca-directory.path)
       script: |
         #!/usr/bin/env sh
         set -eu
-
-        if [ "${PARAM_VERBOSE}" = "true" ] ; then
-          set -x
-        fi
-
-
-        if [ "${WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND}" = "true" ] ; then
-          cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.git-credentials" "${PARAM_USER_HOME}/.git-credentials"
-          cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.gitconfig" "${PARAM_USER_HOME}/.gitconfig"
-          chmod 400 "${PARAM_USER_HOME}/.git-credentials"
-          chmod 400 "${PARAM_USER_HOME}/.gitconfig"
-        fi
-
-        if [ "${WORKSPACE_SSH_DIRECTORY_BOUND}" = "true" ] ; then
-          cp -R "${WORKSPACE_SSH_DIRECTORY_PATH}" "${PARAM_USER_HOME}"/.ssh
-          chmod 700 "${PARAM_USER_HOME}"/.ssh
-          chmod -R 400 "${PARAM_USER_HOME}"/.ssh/*
-        fi
-
-        if [ "${WORKSPACE_SSL_CA_DIRECTORY_BOUND}" = "true" ] ; then
-           export GIT_SSL_CAPATH="${WORKSPACE_SSL_CA_DIRECTORY_PATH}"
-           if [ "${PARAM_CRT_FILENAME}" != "" ] ; then
-              export GIT_SSL_CAINFO="${WORKSPACE_SSL_CA_DIRECTORY_PATH}/${PARAM_CRT_FILENAME}"
-           fi
-        fi
-        CHECKOUT_DIR="${WORKSPACE_OUTPUT_PATH}/${PARAM_SUBDIRECTORY}"
-
-        cleandir() {
-          # Delete any existing contents of the repo directory if it exists.
-          #
-          # We don't just "rm -rf ${CHECKOUT_DIR}" because ${CHECKOUT_DIR} might be "/"
-          # or the root of a mounted volume.
-          if [ -d "${CHECKOUT_DIR}" ] ; then
-            # Delete non-hidden files and directories
-            rm -rf "${CHECKOUT_DIR:?}"/*
-            # Delete files and directories starting with . but excluding ..
-            rm -rf "${CHECKOUT_DIR}"/.[!.]*
-            # Delete files and directories starting with .. plus any other character
-            rm -rf "${CHECKOUT_DIR}"/..?*
-          fi
-        }
-
-        if [ "${PARAM_DELETE_EXISTING}" = "true" ] ; then
-          cleandir
-        fi
-
-        test -z "${PARAM_HTTP_PROXY}" || export HTTP_PROXY="${PARAM_HTTP_PROXY}"
-        test -z "${PARAM_HTTPS_PROXY}" || export HTTPS_PROXY="${PARAM_HTTPS_PROXY}"
-        test -z "${PARAM_NO_PROXY}" || export NO_PROXY="${PARAM_NO_PROXY}"
-
+        # This is necessary for recent version of git
+        git config --global --add safe.directory '*'
+        # (2)
+        cp -R "$(workspaces.ssh-directory.path)" "${HOME}"/.ssh
+        chmod 700 "${HOME}"/.ssh
+        chmod -R 400 "${HOME}"/.ssh/*
+        CHECKOUT_DIR="$(workspaces.output.path)/"
         /ko-app/git-init \
-          -url="${PARAM_URL}" \
-          -revision="${PARAM_REVISION}" \
-          -refspec="${PARAM_REFSPEC}" \
-          -path="${CHECKOUT_DIR}" \
-          -sslVerify="${PARAM_SSL_VERIFY}" \
-          -submodules="${PARAM_SUBMODULES}" \
-          -depth="${PARAM_DEPTH}" \
-          -sparseCheckoutDirectories="${PARAM_SPARSE_CHECKOUT_DIRECTORIES}"
+          -url="$(params.url)" \
+          -revision="$(params.revision)" \
+          -path="${CHECKOUT_DIR}"
         cd "${CHECKOUT_DIR}"
         RESULT_SHA="$(git rev-parse HEAD)"
         EXIT_CODE="$?"
@@ -182,251 +80,124 @@ spec:
           exit "${EXIT_CODE}"
         fi
         printf "%s" "${RESULT_SHA}" > "$(results.commit.path)"
-        printf "%s" "${PARAM_URL}" > "$(results.url.path)"
----
+        printf "%s" "$(params.url)" > "$(results.url.path)"
+----
 
-=== With optional workspaces
+1. Defines the workspace ; here the name is `ssh-directory`, and the description explain how should the secret be created.
+An example of an ssh secret with a `ed25519` private key.
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-github-ssh-credentials
+type: Opaque
+data:
+  id_ed25519: # […]
+  known_hosts: # […]
+  # config: # […] # optional
+----
+This can be created with the following command-line:
++
+[source,bash]
+----
+$ kubectl create secret generic my-github-ssh-credentials \
+  --from-file=id_ed25519=/path/to/.ssh/id_ed25519 \
+  --from-file=known_hosts=/path/to/.ssh/known_hosts
+secret/my-github-ssh-credentials created
+----
+
+2. In the `script`, we are copying the content of the secret (as a folder) to `${HOME}/.ssh` which is the standard folder where `ssh` (and thus `git`) will look for credentials.
+
+[source,bash]
+----
+$ tkn task start git-clone \
+      --param url=git@github.com:vdemeester/buildkit-tekton \
+      --workspace name=output,emptyDir="" \
+      --workspace name=ssh-directory,secret=my-github-ssh-credentials \
+      --use-param-defaults --showlog
+TaskRun started: git-clone-run-kt7fv
+Waiting for logs to be available...
+[clone] {"level":"warn","ts":1657102809.7319033,"caller":"git/git.go:273","msg":"URL(\"git@github.com:vdemeester/buildkit-tekton\") appears to need SSH authentication but no SSH credentials have been provided"}
+[clone] {"level":"info","ts":1657102813.1506214,"caller":"git/git.go:178","msg":"Successfully cloned git@github.com:vdemeester/buildkit-tekton @ e6afd054a907ee447a040c6e95f23fabe038ce6d (grafted, HEAD) in path /workspace/output/"}
+[clone] {"level":"info","ts":1657102813.1600826,"caller":"git/git.go:217","msg":"Successfully initialized and updated submodules in path /workspace/output/"}
+----
+
+Note that the warning `URL(\"git@github.com:vdemeester/buildkit-tekton\") appears to need SSH authentication but no SSH credentials have been provided` appears because the entrypoint didn't see any credentials coming from the annotated secrets attached to a `ServiceAccount` (see <<Using `ServiceAccount`(s)>>). It can safely be ignored in that case.
+
+=== A docker configuration
+
+For this example, we will be using an existing docker configuration file to be used inside a `Task`, similar to the <<A git clone example>> example.
+The `Task` definition is slightly similar to the <<A git clone example>> one. Here we will use `skopeo` to copy an image to our own repository — it could be applied to other tools (`podman`, `buildah`, `docker`, …), basically any tool that is capable of reading a docker client configuration file.
 
 [source,yaml]
 ----
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: git-clone
-  labels:
-    app.kubernetes.io/version: "0.7"
-  annotations:
-    tekton.dev/pipelines.minVersion: "0.29.0"
-    tekton.dev/categories: Git
-    tekton.dev/tags: git
-    tekton.dev/displayName: "git clone"
-    tekton.dev/platforms: "linux/amd64,linux/s390x,linux/ppc64le,linux/arm64"
+  name: skopeo-copy
 spec:
-  description: >-
-    These Tasks are Git tasks to work with repositories used by other tasks
-    in your Pipeline.
-
-    The git-clone Task will clone a repo from the provided url into the
-    output Workspace. By default the repo will be cloned into the root of
-    your Workspace. You can clone into a subdirectory by setting this Task's
-    subdirectory param. This Task also supports sparse checkouts. To perform
-    a sparse checkout, pass a list of comma separated directory patterns to
-    this Task's sparseCheckoutDirectories param.
   workspaces:
-    - name: output
-      description: The git repo will be cloned onto the volume backing this Workspace.
-    - name: ssh-directory
-      optional: true
-      description: |
-        A .ssh directory with private key, known_hosts, config, etc. Copied to
-        the user's home before git commands are executed. Used to authenticate
-        with the git remote when performing the clone. Binding a Secret to this
-        Workspace is strongly recommended over other volume types.
-    - name: basic-auth
-      optional: true
-      description: |
-        A Workspace containing a .gitconfig and .git-credentials file. These
-        will be copied to the user's home before any git commands are run. Any
-        other files in this Workspace are ignored. It is strongly recommended
-        to use ssh-directory over basic-auth whenever possible and to bind a
-        Secret to this Workspace over other volume types.
-    - name: ssl-ca-directory
-      optional: true
-      description: |
-        A workspace containing CA certificates, this will be used by Git to
-        verify the peer with when fetching or pushing over HTTPS.
-  params:
-    - name: url
-      description: Repository URL to clone from.
-      type: string
-    - name: revision
-      description: Revision to checkout. (branch, tag, sha, ref, etc...)
-      type: string
-      default: ""
-    - name: refspec
-      description: Refspec to fetch before checking out revision.
-      default: ""
-    - name: submodules
-      description: Initialize and fetch git submodules.
-      type: string
-      default: "true"
-    - name: depth
-      description: Perform a shallow clone, fetching only the most recent N commits.
-      type: string
-      default: "1"
-    - name: sslVerify
-      description: Set the `http.sslVerify` global git config. Setting this to `false` is not advised unless you are sure that you trust your git remote.
-      type: string
-      default: "true"
-    - name: crtFileName
-      description: file name of mounted crt using ssl-ca-directory workspace. default value is ca-bundle.crt.
-      type: string
-      default: "ca-bundle.crt"
-    - name: subdirectory
-      description: Subdirectory inside the `output` Workspace to clone the repo into.
-      type: string
-      default: ""
-    - name: sparseCheckoutDirectories
-      description: Define the directory patterns to match or exclude when performing a sparse checkout.
-      type: string
-      default: ""
-    - name: deleteExisting
-      description: Clean out the contents of the destination directory if it already exists before cloning.
-      type: string
-      default: "true"
-    - name: httpProxy
-      description: HTTP proxy server for non-SSL requests.
-      type: string
-      default: ""
-    - name: httpsProxy
-      description: HTTPS proxy server for SSL requests.
-      type: string
-      default: ""
-    - name: noProxy
-      description: Opt out of proxying HTTP/HTTPS requests.
-      type: string
-      default: ""
-    - name: verbose
-      description: Log the commands that are executed during `git-clone`'s operation.
-      type: string
-      default: "true"
-    - name: gitInitImage
-      description: The image providing the git-init binary that this Task runs.
-      type: string
-      default: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.29.0"
-    - name: userHome
-      description: |
-        Absolute path to the user's home directory. Set this explicitly if you are running the image as a non-root user or have overridden
-        the gitInitImage param with an image containing custom user configuration.
-      type: string
-      default: "/tekton/home"
-  results:
-    - name: commit
-      description: The precise commit SHA that was fetched by this Task.
-    - name: url
-      description: The precise URL that was fetched by this Task.
+    - name: dockerconfig # (1)
+      description: Includes a docker `config.json`
   steps:
     - name: clone
-      image: "$(params.gitInitImage)"
+      image: quay.io/skopeo/stable:v1.8.0
       env:
-      - name: HOME
-        value: "$(params.userHome)"
-      - name: PARAM_URL
-        value: $(params.url)
-      - name: PARAM_REVISION
-        value: $(params.revision)
-      - name: PARAM_REFSPEC
-        value: $(params.refspec)
-      - name: PARAM_SUBMODULES
-        value: $(params.submodules)
-      - name: PARAM_DEPTH
-        value: $(params.depth)
-      - name: PARAM_SSL_VERIFY
-        value: $(params.sslVerify)
-      - name: PARAM_CRT_FILENAME
-        value: $(params.crtFileName)
-      - name: PARAM_SUBDIRECTORY
-        value: $(params.subdirectory)
-      - name: PARAM_DELETE_EXISTING
-        value: $(params.deleteExisting)
-      - name: PARAM_HTTP_PROXY
-        value: $(params.httpProxy)
-      - name: PARAM_HTTPS_PROXY
-        value: $(params.httpsProxy)
-      - name: PARAM_NO_PROXY
-        value: $(params.noProxy)
-      - name: PARAM_VERBOSE
-        value: $(params.verbose)
-      - name: PARAM_SPARSE_CHECKOUT_DIRECTORIES
-        value: $(params.sparseCheckoutDirectories)
-      - name: PARAM_USER_HOME
-        value: $(params.userHome)
-      - name: WORKSPACE_OUTPUT_PATH
-        value: $(workspaces.output.path)
-      - name: WORKSPACE_SSH_DIRECTORY_BOUND
-        value: $(workspaces.ssh-directory.bound)
-      - name: WORKSPACE_SSH_DIRECTORY_PATH
-        value: $(workspaces.ssh-directory.path)
-      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND
-        value: $(workspaces.basic-auth.bound)
-      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_PATH
-        value: $(workspaces.basic-auth.path)
-      - name: WORKSPACE_SSL_CA_DIRECTORY_BOUND
-        value: $(workspaces.ssl-ca-directory.bound)
-      - name: WORKSPACE_SSL_CA_DIRECTORY_PATH
-        value: $(workspaces.ssl-ca-directory.path)
+      - name: DOCKER_CONFIG
+        value: $(workspaces.dockerconfig.path) # (2)
       script: |
         #!/usr/bin/env sh
         set -eu
-
-        if [ "${PARAM_VERBOSE}" = "true" ] ; then
-          set -x
-        fi
-
-
-        if [ "${WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND}" = "true" ] ; then
-          cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.git-credentials" "${PARAM_USER_HOME}/.git-credentials"
-          cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.gitconfig" "${PARAM_USER_HOME}/.gitconfig"
-          chmod 400 "${PARAM_USER_HOME}/.git-credentials"
-          chmod 400 "${PARAM_USER_HOME}/.gitconfig"
-        fi
-
-        if [ "${WORKSPACE_SSH_DIRECTORY_BOUND}" = "true" ] ; then
-          cp -R "${WORKSPACE_SSH_DIRECTORY_PATH}" "${PARAM_USER_HOME}"/.ssh
-          chmod 700 "${PARAM_USER_HOME}"/.ssh
-          chmod -R 400 "${PARAM_USER_HOME}"/.ssh/*
-        fi
-
-        if [ "${WORKSPACE_SSL_CA_DIRECTORY_BOUND}" = "true" ] ; then
-           export GIT_SSL_CAPATH="${WORKSPACE_SSL_CA_DIRECTORY_PATH}"
-           if [ "${PARAM_CRT_FILENAME}" != "" ] ; then
-              export GIT_SSL_CAINFO="${WORKSPACE_SSL_CA_DIRECTORY_PATH}/${PARAM_CRT_FILENAME}"
-           fi
-        fi
-        CHECKOUT_DIR="${WORKSPACE_OUTPUT_PATH}/${PARAM_SUBDIRECTORY}"
-
-        cleandir() {
-          # Delete any existing contents of the repo directory if it exists.
-          #
-          # We don't just "rm -rf ${CHECKOUT_DIR}" because ${CHECKOUT_DIR} might be "/"
-          # or the root of a mounted volume.
-          if [ -d "${CHECKOUT_DIR}" ] ; then
-            # Delete non-hidden files and directories
-            rm -rf "${CHECKOUT_DIR:?}"/*
-            # Delete files and directories starting with . but excluding ..
-            rm -rf "${CHECKOUT_DIR}"/.[!.]*
-            # Delete files and directories starting with .. plus any other character
-            rm -rf "${CHECKOUT_DIR}"/..?*
-          fi
-        }
-
-        if [ "${PARAM_DELETE_EXISTING}" = "true" ] ; then
-          cleandir
-        fi
-
-        test -z "${PARAM_HTTP_PROXY}" || export HTTP_PROXY="${PARAM_HTTP_PROXY}"
-        test -z "${PARAM_HTTPS_PROXY}" || export HTTPS_PROXY="${PARAM_HTTPS_PROXY}"
-        test -z "${PARAM_NO_PROXY}" || export NO_PROXY="${PARAM_NO_PROXY}"
-
-        /ko-app/git-init \
-          -url="${PARAM_URL}" \
-          -revision="${PARAM_REVISION}" \
-          -refspec="${PARAM_REFSPEC}" \
-          -path="${CHECKOUT_DIR}" \
-          -sslVerify="${PARAM_SSL_VERIFY}" \
-          -submodules="${PARAM_SUBMODULES}" \
-          -depth="${PARAM_DEPTH}" \
-          -sparseCheckoutDirectories="${PARAM_SPARSE_CHECKOUT_DIRECTORIES}"
-        cd "${CHECKOUT_DIR}"
-        RESULT_SHA="$(git rev-parse HEAD)"
-        EXIT_CODE="$?"
-        if [ "${EXIT_CODE}" != 0 ] ; then
-          exit "${EXIT_CODE}"
-        fi
-        printf "%s" "${RESULT_SHA}" > "$(results.commit.path)"
-        printf "%s" "${PARAM_URL}" > "$(results.url.path)"
+        skopeo copy docker://docker.io/library/ubuntu:latest docker://docker.io/vdemeester/ubuntu-copy:latest
 ----
+
+1. Similar to <<A git clone example>>, we define a workspace that should contain a `config.json` file. For a secret, this means a key named `config.json`.
+An example of an ssh secret with a `ed25519` private key.
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+type: Opaque
+data:
+  config.json: # […]
+----
+This can be created with the following command-line:
++
+[source,bash]
+----
+$ kubectl create secret generic regcred \
+  --from-file=config.json=/path/to/.docker/config.json
+secret/regcred created
+----
+
+2. Here we are just setting the `DOCKER_CONFIG` environment variable to point to the `dockerconfig` workspace path. `skopeo` (as a lot of docker-ish client) do read this environment variable to get the docker client configuration information, and in our case, the authentication informations.
+
+[source,bash]
+----
+$ tkn task start skopeo-copy --workspace name=dockerconfig,secret=regcred --showlog
+TaskRun started: skopeo-copy-run-cfg7l
+Waiting for logs to be available...
+[clone] DOCKER_CONFIG=/workspace/dockerconfig
+Getting image source signatures
+[clone] Copying blob sha256:405f018f9d1d0f351c196b841a7c7f226fb8ea448acd6339a9ed8741600275a2
+[clone] Copying config sha256:27941809078cc9b2802deb2b0bb6feed6c236cde01e487f200e24653533701ee
+[clone] Writing manifest to image destination
+[clone] Storing signatures
+----
+
+=== With optional workspaces
+
+TODO
 
 == Using `ServiceAccount`(s)
 
+TODO
+
 == Using `VolumeMount`(s)
+
+TODO
