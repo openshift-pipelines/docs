@@ -4,3 +4,5 @@
 
 __Unofficial__ documentation for OpenShift Pipelines maintained by the
 engineers working on the project.
+
+- xref:auth.adoc[Authentication practices with Tekton]
