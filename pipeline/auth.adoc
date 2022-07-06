@@ -6,6 +6,7 @@
 The __upstream__ official documentation around authentication is available https://tekton.dev/docs/pipelines/auth/[here]. It mainly focus on authenticating through annotated secrets and service accounts. This document will try to explore the different way to use "secrets" for authentication in your ``Pipeline`` and ``Task``.
 
 There is at least three ways to use secrets to authenticate to Github or Docker or.
+
 - Using secrets and workspaces **highly recommended**
 - Using a `ServiceAccount` **recommended**
 - Using `VolumeMount` **not recommended**
