@@ -18,4 +18,6 @@ engineers working on the project.
 
 == Chains xref:chains/index.adoc[➡]
 
-== Pipeline as code xref:pac/index.adoc[➡]
+== Pipeline as code https://pipelinesascode.com/[➡]
+
+The upstream documentation for Pipeline as code is very good, so let's just go there: https://pipelinesascode.com/[pipelinesascode.com]
