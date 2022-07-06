@@ -11,6 +11,7 @@ There is at least three ways to use secrets to authenticate to Github or Docker 
 - Using a `ServiceAccount` **recommended**
 - Using `VolumeMount` **not recommended**
 
+[#secrets-and-workspaces]
 == Using `Secret`(s) and `Workspace`(s)
 
 This is the most flexible approach, especially if you use the __optional__ workspace feature.
@@ -20,7 +21,8 @@ The general idea behind this approach is:
 
 We'll take the example with a very simple `git-clone` Task, as well as a very simple `docker build`, but it can apply to anything else.
 
-=== A git clone example
+[#git-clone]
+=== A `git clone` example
 
 For this example, we assume we are using `git` with `ssh` to authenticate. Later in the document, we will show different approaches.
 
@@ -127,10 +129,11 @@ Waiting for logs to be available...
 
 Note that the warning `URL(\"git@github.com:vdemeester/buildkit-tekton\") appears to need SSH authentication but no SSH credentials have been provided` appears because the entrypoint didn't see any credentials coming from the annotated secrets attached to a `ServiceAccount` (see <<Using `ServiceAccount`(s)>>). It can safely be ignored in that case.
 
+[#docker-configuration]
 === A docker configuration
 
-For this example, we will be using an existing docker configuration file to be used inside a `Task`, similar to the <<A git clone example>> example.
-The `Task` definition is slightly similar to the <<A git clone example>> one. Here we will use `skopeo` to copy an image to our own repository — it could be applied to other tools (`podman`, `buildah`, `docker`, …), basically any tool that is capable of reading a docker client configuration file.
+For this example, we will be using an existing docker configuration file to be used inside a `Task`, similar to the <<git-clone>> example.
+The `Task` definition is slightly similar to the <<git-clone>> one. Here we will use `skopeo` to copy an image to our own repository — it could be applied to other tools (`podman`, `buildah`, `docker`, …), basically any tool that is capable of reading a docker client configuration file.
 
 [source,yaml]
 ----
@@ -154,7 +157,7 @@ spec:
         skopeo copy docker://docker.io/library/ubuntu:latest docker://docker.io/vdemeester/ubuntu-copy:latest
 ----
 
-1. Similar to <<A git clone example>>, we define a workspace that should contain a `config.json` file. For a secret, this means a key named `config.json`.
+1. Similar to <<git-clone>>, we define a workspace that should contain a `config.json` file. For a secret, this means a key named `config.json`.
 An example of an ssh secret with a `ed25519` private key.
 +
 [source,yaml]
@@ -195,10 +198,12 @@ Getting image source signatures
 
 TODO
 
+[#serviceaccounts]
 == Using `ServiceAccount`(s)
 
 TODO
 
+[#volumemounts]
 == Using `VolumeMount`(s)
 
 TODO
