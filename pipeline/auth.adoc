@@ -443,6 +443,6 @@ $ tkn pipeline start demo-pipeline --serviceaccount build-bot --param # […]
 [#volumemounts]
 == Using `VolumeMount`(s)
 
-Because this solution is **highly** discourage, mainly due to the fact that `Volume` and `VolumeMount` might go away in the API, see https://github.com/tektoncd/pipeline/issues/2058[Remove "volumes" from Task before V1], we'll only scratch the surface on how it __would work__.
+Because this solution is **highly** discouraged, mainly due to the fact that `Volume` and `VolumeMount` might go away in the API, see https://github.com/tektoncd/pipeline/issues/2058[Remove "volumes" from Task before V1], we'll only scratch the surface on how it __would work__.
 
 The idea of this solution is very similar to <<secrets-and-workspaces>> but using `Volume` and `VolumeMount` instead. You wount a `Secret` in a `Volume` using `VolumeMount` in the `Task`, and you act based on the path it is mounted on to copy the secrets to the right place.
