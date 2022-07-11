@@ -198,14 +198,251 @@ Getting image source signatures
 
 === With optional workspaces
 
-TODO
+This approach is extremely similar to the one above **but** using the optional feature of https://tekton.dev/docs/pipelines/workspaces/#using-workspaces-in-tasks[workspaces]. In a gist, this means a `Workspace` __might__ be bound to it (a.k.a. mounted as a volume in the `Pod`/`Container`) ; but it could also not be present.
+
+The only difference here will be, to make sure our `Task` takes this __optional__ property into account. The https://hub.tekton.dev/tekton/task/git-clone[`git-clone`] upstream `Task` shows an example of that. Let's adapt the <<git-clone>> example with optional `Workspace` support.
+
+
+[source,yaml]
+----
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-clone
+spec:
+  workspaces:
+    - name: output
+      description: The git repo will be cloned onto the volume backing this Workspace.
+    - name: ssh-directory # (1)
+      description: |
+        A .ssh directory with private key, known_hosts, config, etc. Copied to
+        the user's home before git commands are executed. Used to authenticate
+        with the git remote when performing the clone. Binding a Secret to this
+        Workspace is strongly recommended over other volume types
+  params:
+    - name: url
+      description: Repository URL to clone from.
+      type: string
+    - name: revision
+      description: Revision to checkout. (branch, tag, sha, ref, etc...)
+      type: string
+      default: ""
+    - name: gitInitImage
+      description: The image providing the git-init binary that this Task runs.
+      type: string
+      default: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.37.0"
+  results:
+    - name: commit
+      description: The precise commit SHA that was fetched by this Task.
+    - name: url
+      description: The precise URL that was fetched by this Task.
+  steps:
+    - name: clone
+      image: "$(params.gitInitImage)"
+      script: |
+        #!/usr/bin/env sh
+        set -eu
+        # This is necessary for recent version of git
+        git config --global --add safe.directory '*'
+        # (2)
+        if [ "$(workspaces.ssh-directory.bound)" = "true" ] ; then
+          cp -R "$(workspaces.ssh-directory.path)" "${HOME}"/.ssh
+          chmod 700 "${HOME}"/.ssh
+          chmod -R 400 "${HOME}"/.ssh/*
+        fi
+        CHECKOUT_DIR="$(workspaces.output.path)/"
+        /ko-app/git-init \
+          -url="$(params.url)" \
+          -revision="$(params.revision)" \
+          -path="${CHECKOUT_DIR}"
+        cd "${CHECKOUT_DIR}"
+        RESULT_SHA="$(git rev-parse HEAD)"
+        EXIT_CODE="$?"
+        if [ "${EXIT_CODE}" != 0 ] ; then
+          exit "${EXIT_CODE}"
+        fi
+        printf "%s" "${RESULT_SHA}" > "$(results.commit.path)"
+        printf "%s" "$(params.url)" > "$(results.url.path)"
+----
+
+1. Defines the workspace ; here the name is `ssh-directory`, and the description explain how should the secret be created. The example in <<git-clone>> apply here as well.
+
+2. In the `script`, we are conditionally copying the content of the secret (as a folder) to `${HOME}/.ssh` which is the standard folder where `ssh` (and thus `git`) will look for credentials. If the `Workspace` is bound we copy, if it's not bound, we don't do anything.
+
+The main advantage of using optionnal `Workspace` is that it makes your `Task` a bit more flexible. For example, with `git-clone`, if you are going to clone a publicly available git repository, you won't bind a `Secret` to the `Workspace`.
+
+=== With `git-credentials`
+
+We can apply both the approach with and without the __optional__ `Workspace` with other means of authenticating than `ssh` keys for `git-clone`, for example. Git has a notion of https://git-scm.com/docs/git-credential/[`git-credential`] that could be used here. Using __optional__ workspace as above, it could look like the following.
+
+[source,yaml]
+----
+        if [ "$(workspaces.basic_auth.bound)" = "true" ] ; then
+          cp "$(workspaces.basic_auth.path)/.git-credentials" "${HOME}/.git-credentials"
+          cp "$(workspaces.basic_auth.path)/.gitconfig" "${HOME}/.gitconfig"
+          chmod 400 "${HOME}/.git-credentials"
+          chmod 400 "${HOME}/.gitconfig"
+        fi
+----
 
 [#serviceaccounts]
 == Using `ServiceAccount`(s)
 
-TODO
+The `ServiceAccount` approach is the most widely documentated, especially https://tekton.dev/docs/pipelines/auth/[upstream]. The goal here is not to paraphrase the upstream documentation, so we'll just describe what the flow is.
+
+This methods constits, in a gist, of the following:
+- `Secret`(s) annotated specifcally, see <<annotations>>
+- `ServiceAccount`(s) that are linked to those annotated `Secret`(s), see <<link-secret-to-serviceaccount>>
+- `PipelineRun`(s) or `TaskRun`(s) using this/those `ServiceAccount`(s), see <<specify-serviceaccount-on-runs>>
+
+[#annotations]
+=== Annotations
+
+Tetkon support two different type of authentication for secrets : `git` and `docker`. The annotation "reflect" this :
+
+- `tekton.dev/git-{}` mark the annotated secret as a `git` secret.
+- `tekton.dev/docker-{}` mark the annotated secret as a `docker` secret.
+
+In addition, Tekton supports different types of secret per type of authentication. See the https://kubernetes.io/docs/concepts/configuration/secret/#secret-types[Types of Secrets] kubernetes documentation for more details on those secrets.
+
+- For `git` secrets:
+  - `kubernetes.io/basic-auth` : basic authentication
+  - `kubernetes.io/ssh-auth` : ssh based authentication (keys, …)
+- For `docker` secrets:
+  - `kubernetes.io/basic-auth` : basic authentications
+  - `kubernetes.io/dockercfg` : serialized `~/.dockercfg` file
+  - `kubernetes.io/dockerconfigjson` : serialized `~/.docker/config.json` file
+
+We'll just show a set of example of annotated secrets with a quick description of them.
+
+IMPORTANT: Almost all the example below are using `stringData`, which are direct content of the secret (visible for everybody that can get `Secret`). They can also all work with `data`, which is the `base64` encoded version of the data, that gives a little bit more obfuscation to the `Secrets`.
+
+- [.underline]#basic authentication for `git`# : for gitlab.com as well as github.com. It seems not very secure to use the same user/password for authenticating different git provider, but that's just to show that a `Secret` can be used to target multiple host.
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    tekton.dev/git-0: https://github.com
+    tekton.dev/git-1: https://gitlab.com
+type: kubernetes.io/basic-auth
+stringData:
+  username: <cleartext username>
+  password: <cleartext password>
+----
+- [.underline]#ssh authentication for `git`#:
++ 
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    tekton.dev/git-0: github.com
+type: kubernetes.io/ssh-auth
+stringData:
+  ssh-privatekey: <private-key>
+  # This is non-standard, but its use is encouraged to make this more secure.
+  # Omitting this results in the server's public key being blindly accepted.
+----
+- [.underline]#basic authentication for `docker`#
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    tekton.dev/docker-0: https://gcr.io
+type: kubernetes.io/basic-auth
+stringData:
+  username: <cleartext username>
+  password: <cleartext password>
+----
+- [.underline]#`kubernetes.io/dockerconfigjson` authentication for `docker`#. This type of secret (with `kubernetes.io/dockercfg`) do not need to be annotated as it can contain authentication for multiple hosts.
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: # base64 encoded content of a docker `config.json` file
+----
++
+It can be created easily with the following command-line
++
+[source,bash]
+----
+$ kubectl create secret generic regcred \
+          --from-file=.dockerconfigjson=<path/to/.docker/config.json> \
+          --type=kubernetes.io/dockerconfigjson`.
+----
+
+[#link-secret-to-serviceaccount]
+=== Link `Secret`(s) to `ServiceAccount`(s)
+
+To link a `Secret` to a `ServiceAccount`, you need to reference the `Secret`, by name, in the `secrets` field of the `ServiceAccount`.
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: build-bot
+secrets:
+  - name: regcred
+  - name: a-git-auth-secret
+----
+
+[#specify-serviceaccount-on-runs]
+=== Specify `SerivceAccount`(s) on `PipelineRun`/`TaskRun`(s)
+
+To add a `ServiceAccount` to a `PipelineRun` or a `TaskRun` you can use the `serviceAccountName` field.
+
+[source,yaml]
+----
+# For a TaskRun
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: build-with-basic-auth
+spec:
+  serviceAccountName: build-bot
+  taskRef:
+    name: demo-task
+  # ...
+---
+# For a PipelineRun
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: demo-pipeline
+  namespace: default
+spec:
+  serviceAccountName: build-bot
+  pipelineRef:
+    name: demo-pipeline
+  # […]
+----
+
+It is also possible to use https://github.com/tektoncd/cli[`tkn`] to achieve the same.
+
+[source,bash]
+---
+# For a TaskRun
+$ tkn task start demo-task --serviceaccount build-bot
+# For a PipelineRun
+$ tkn pipeline start demo-pipeline --serviceaccount build-bot --param # […]
+---
 
 [#volumemounts]
 == Using `VolumeMount`(s)
 
-TODO
+Because this solution is **highly** discourage, mainly due to the fact that `Volume` and `VolumeMount` might go away in the API, see https://github.com/tektoncd/pipeline/issues/2058[Remove "volumes" from Task before V1], we'll only scratch the surface on how it __would work__.
+
+The idea of this solution is very similar to <<secrets-and-workspaces>> but using `Volume` and `VolumeMount` instead. You wount a `Secret` in a `Volume` using `VolumeMount` in the `Task`, and you act based on the path it is mounted on to copy the secrets to the right place.
