@@ -9,6 +9,8 @@ engineers working on the project.
 
 == The Operator xref:operator/index.adoc[➡]
 
+- xref:operator/troubleshooting.adoc[Troubleshooting]
+
 == Pipeline xref:pipeline/index.adoc[➡]
 
 - xref:pipeline/auth.adoc[Authentication practices with Tekton]
