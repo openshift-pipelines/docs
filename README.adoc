@@ -1,4 +1,4 @@
-= openshift-pipelines.xyz
+= openshift-pipelines.org
 :toc: left
 :toclevels: 5
 :docinfo: shared
