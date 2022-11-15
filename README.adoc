@@ -14,7 +14,8 @@ engineers working on the project.
 == Pipeline xref:pipeline/index.adoc[➡]
 
 - xref:pipeline/auth.adoc[Authentication practices with Tekton]
-- xref:pipeline/hardened.doc[Hardened your Pipelines and Tasks]
+- xref:pipeline/hardened.adoc[Hardened your Pipelines and Tasks]
+- xref:pipeline/unprivileged-builds.adoc[Build container image with buildah, unprivileged]
 
 == Triggers xref:triggers/index.adoc[➡]
 
