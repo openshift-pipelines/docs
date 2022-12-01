@@ -218,6 +218,8 @@ spec:
 
 Now, we can start a `TaskRun` or integrate it with a `PipelineRun`.
 
+=== `TaskRun`
+
 [source,yaml]
 ----
 apiVersion: v1
@@ -253,6 +255,82 @@ spec:
 
 1. In this example, we only want to run a `TaskRun`, so we won't have any prior task that fetches some sources with a `Dockerfile`, so we will use a `configmap` instead.
 2.  Thanks to the `workspace`, we can mount a `configmap` as the __source__ workspace for our `buildah-as-user` `Task`.
+
+=== `PipelineRun`
+
+
+[source,yaml]
+----
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pipeline-buildah-as-user-1000
+spec:
+  params:
+  - name: IMAGE
+  - name: URL
+  workspaces:
+  - name: shared-workspace
+  - name: sslcertdir
+    optional: true
+  tasks:
+  - name: fetch-repository (1)
+    taskRef:
+      name: git-clone
+      kind: ClusterTask
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+    params:
+    - name: url
+      value: $(params.URL)
+    - name: subdirectory
+      value: ""
+    - name: deleteExisting
+      value: "true"
+  - name: buildah
+    taskRef:
+      name: buildah-as-user (2)
+    runAfter:
+    - fetch-repository
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    - name: sslcertdir
+      workspace: sslcertdir
+    params:
+    - name: IMAGE
+      value: $(params.IMAGE)
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: pipelinerun-buildah-as-user-1000
+spec:
+  serviceAccountName: pipelines-sa-userid-1000
+  params:
+  - name: URL
+    value: https://github.com/openshift/pipelines-vote-api
+  - name: IMAGE
+    value: image-registry.openshift-image-registry.svc:5000/test/buildahuser
+  taskRef:
+    kind: Pipeline
+    name: pipeline-buildah-as-user-1000
+  workspaces:
+  - name: shared-workspace (3)
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi
+----
+
+1. In this example, we will use the `git-clone` `ClusterTask` to fetch the source containing a `Dockerfile` and then use that new buildah task to build it.
+2. We are refering to our modified `buildah` `Task`
+3. We are using a PVC, automatically created by the controller, to share data between the `git-clone` Task and our modified `buildah` task
+
 
 === Known issues
 
