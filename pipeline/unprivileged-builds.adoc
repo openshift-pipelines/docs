@@ -50,12 +50,12 @@ In 1.8, the `pipeline` SA already allow to use a user id outside of the namespac
 
 [source,yaml]
 ----
-apiVersion: v1 (1)
+apiVersion: v1 <1>
 kind: ServiceAccount
 metadata:
   name: pipelines-sa-userid-1000
 ---
-kind: SecurityContextConstraints (2)
+kind: SecurityContextConstraints <2>
 metadata:
   annotations:
   name: pipelines-scc-userid-1000
@@ -77,7 +77,7 @@ priority: 10
 readOnlyRootFilesystem: false
 requiredDropCapabilities:
 - MKNOD
-runAsUser: (3)
+runAsUser: <3>
   type: MustRunAs
   uid: 1000
 seLinuxContext:
@@ -93,7 +93,7 @@ volumes:
 - projected
 - secret
 ---
-apiVersion: rbac.authorization.k8s.io/v1 (4)
+apiVersion: rbac.authorization.k8s.io/v1 <4>
 kind: ClusterRole
 metadata:
   name: pipelines-scc-userid-1000-clusterrole
@@ -107,7 +107,7 @@ rules:
   verbs:
   - use
 ---
-apiVersion: rbac.authorization.k8s.io/v1 (5)
+apiVersion: rbac.authorization.k8s.io/v1 <5>
 kind: RoleBinding
 metadata:
   name: pipelines-scc-userid-1000-rolebinding
@@ -120,11 +120,11 @@ subjects:
   name: pipelines-sa-userid-1000
 ----
 
-1. This is the service account we'll use later on.
-2. This is the custom SCC, based of `restricted` with only the `runAsUser` change
-3. This is the most important part of the SCC. Here we are "enforcing" any Pod that will get this SCC attached (through the ServiceAccount) to run as userid 100 (and not anything else).
-4. This is the ClusterRole the will use our SCC.
-5. This binds our ClusterRole (that uses our SCC) to the ServiceAccount we created earlier.
+<1> This is the service account we'll use later on.
+<2> This is the custom SCC, based of `restricted` with only the `runAsUser` change
+<3> This is the most important part of the SCC. Here we are "enforcing" any Pod that will get this SCC attached (through the ServiceAccount) to run as userid 100 (and not anything else).
+<4> This is the ClusterRole the will use our SCC.
+<5> This binds our ClusterRole (that uses our SCC) to the ServiceAccount we created earlier.
 
 With this setup, any Pod that runs with the `pipelines-sa-userid-1000` service account will be able to run as userid `1000`, and only that userid.
 
@@ -187,11 +187,11 @@ spec:
   steps:
   - name: build
     securityContext:
-      runAsUser: 1000 (1)
+      runAsUser: 1000 <1>
     image: $(params.BUILDER_IMAGE)
     workingDir: $(workspaces.source.path)
     script: |
-      echo "Running as USER ID `id`" (2)
+      echo "Running as USER ID `id`" <2>
       buildah --storage-driver=$(params.STORAGE_DRIVER) bud \
         $(params.BUILD_EXTRA_ARGS) --format=$(params.FORMAT) \
         --tls-verify=$(params.TLSVERIFY) --no-cache \
@@ -213,8 +213,8 @@ spec:
     emptyDir: {}
 ----
 
-1. This is where we explicitly ask to run the container as the user id `1000` which correspond to the `build` user in the buildah image.
-2. We print the the user id, just to showcase we are running the process as user id `1000`.
+<1> This is where we explicitly ask to run the container as the user id `1000` which correspond to the `build` user in the buildah image.
+<2> We print the the user id, just to showcase we are running the process as user id `1000`.
 
 Now, we can start a `TaskRun` or integrate it with a `PipelineRun`.
 
@@ -233,7 +233,7 @@ data:
     CMD git
 kind: ConfigMap
 metadata:
-  name: dockerfile (1)
+  name: dockerfile <1>
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TaskRun
@@ -249,12 +249,12 @@ spec:
     name: buildah-as-user
   workspaces:
   - configMap:
-      name: dockerfile (2)
+      name: dockerfile <2>
     name: source
 ----
 
-1. In this example, we only want to run a `TaskRun`, so we won't have any prior task that fetches some sources with a `Dockerfile`, so we will use a `configmap` instead.
-2.  Thanks to the `workspace`, we can mount a `configmap` as the __source__ workspace for our `buildah-as-user` `Task`.
+<1> In this example, we only want to run a `TaskRun`, so we won't have any prior task that fetches some sources with a `Dockerfile`, so we will use a `configmap` instead.
+<2>  Thanks to the `workspace`, we can mount a `configmap` as the __source__ workspace for our `buildah-as-user` `Task`.
 
 === `PipelineRun`
 
@@ -274,7 +274,7 @@ spec:
   - name: sslcertdir
     optional: true
   tasks:
-  - name: fetch-repository (1)
+  - name: fetch-repository <1>
     taskRef:
       name: git-clone
       kind: ClusterTask
@@ -290,7 +290,7 @@ spec:
       value: "true"
   - name: buildah
     taskRef:
-      name: buildah-as-user (2)
+      name: buildah-as-user <2>
     runAfter:
     - fetch-repository
     workspaces:
@@ -317,7 +317,7 @@ spec:
     kind: Pipeline
     name: pipeline-buildah-as-user-1000
   workspaces:
-  - name: shared-workspace (3)
+  - name: shared-workspace <3>
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -327,9 +327,9 @@ spec:
             storage: 100Mi
 ----
 
-1. In this example, we will use the `git-clone` `ClusterTask` to fetch the source containing a `Dockerfile` and then use that new buildah task to build it.
-2. We are refering to our modified `buildah` `Task`
-3. We are using a PVC, automatically created by the controller, to share data between the `git-clone` Task and our modified `buildah` task
+<1> In this example, we will use the `git-clone` `ClusterTask` to fetch the source containing a `Dockerfile` and then use that new buildah task to build it.
+<2> We are refering to our modified `buildah` `Task`
+<3> We are using a PVC, automatically created by the controller, to share data between the `git-clone` Task and our modified `buildah` task
 
 
 === Known issues
