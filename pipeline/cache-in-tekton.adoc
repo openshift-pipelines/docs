@@ -39,15 +39,13 @@ There is two parts of this for Tekton:
 - How `Task` are written to easily use/interact with caches. For example, a `go` build `Task` should be able to use a `GOCACHE` if provided, but doesn't need to know anything about *how* it is provided. This is the _easiest_ part and the least opiniated one as well.
 - How to provide the cache *content* to the the `TaskRun`. This is the _tricky_ part, and there is a lot of different / possible ways to do that.
 
-== Authoring cache friendly tasks
+== Authoring cache friendly tasks (example with `go`)
 
 This is the *easy* part of supporting caches in Tekton, and this is also the most important one for `Task` author. This part is about how to write tasks that can easily be _hook-up_, somehow, with some caching mechanism. We'll go through example of different "language" to draw a decent picture.
 
 As an author of a `Task`, especially if we aim to make this `Task` as shareable as possible, this is the only thing we should care about. Someone else (a.k.a the user using this `Task` or a tool) will have to provide you with the cache.
 
-=== `go` cache
-
-==== The `Task` definition
+=== The `Task` definition
 
 Go uses `GOCACHE` to know and store any _build_ related cache (compilation) and `GOMODCACHE` for `go.mod` dependencies. To write a `Task`
 
@@ -214,12 +212,34 @@ spec:
 <1> We bind our `go-cache` PVC to the `go-cache` workspace.
 <2> We bind our `gomod-cache` PVC to the `gomod-cache` workspace.
 
-==== Shortcomings
+=== Shortcomings
 
 There is a few possible _shortcomings_ with this approach:
 
 - Depending on the _class_ of the persistent storage, it might be tricky to get those PVC provisionned. In addition, the cluster might have some quotas on the number of PVC used, and these being "always" there would take some _place_ in this quota.
 - Similar to the previous point, depending on the access mode (`ReadWriteMany`, `ReadWriteOnce`, …), it may force the pipeline to all run on the same node, or make the cache read-only (which would be.. way less useful).
+
+=== Full cache support in a Task
+
+Following what we just did, we could *enhance* our `Task` definition to be able to caching itself. At authoring time, we can have steps that pull and push some folder/workspace.
+
+There would be 2 steps to add : `cache-fetch` and `cache-upload`. For each _implementation_, the content/tool/workflow of those steps would differ.
+
+==== Using `oci` image
+
+- `cache-fetch`, which would consist of
+  - compute a unique hash from something to identify the cache. For example, for `go` we would use `go.sum` file
+  - try to fetch an image tagged with that hash
+    - if it doesn't exit, we just warn and pass on
+    - if it succeeds, we extract it to the `go-cache` workspace/folder
+- `cache-upload`
+  - compute a unique hash from something to identify the cache. For example, for `go` we would use `go.sum` file
+  - push the image tagged with that hash
+  - _possible optimization_: compare the cache content / image tarball, with the one we fetch, if it's similar, we don't even need to push
+
+==== Using `rsync`
+
+IMPORTANT: This need to be completed
 
 == Remote resolution explorations
 
