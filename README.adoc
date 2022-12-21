@@ -16,7 +16,7 @@ engineers working on the project.
 - xref:pipeline/auth.adoc[Authentication practices with Tekton]
 - xref:pipeline/hardened.adoc[Hardened your Pipelines and Tasks]
 - xref:pipeline/unprivileged-builds.adoc[Build container image with buildah, unprivileged]
-- xref:pipeline/cache
+- xref:pipeline/cache-in-tekton.adoc[Caches "support" in tekton pipelines]
 
 == Triggers xref:triggers/index.adoc[➡]
 
