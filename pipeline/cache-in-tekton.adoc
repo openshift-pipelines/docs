@@ -227,15 +227,15 @@ There would be 2 steps to add : `cache-fetch` and `cache-upload`. For each _impl
 
 ==== Using `oci` image
 
-- `cache-fetch`, which would consist of
-  - compute a unique hash from something to identify the cache. For example, for `go` we would use `go.sum` file
-  - try to fetch an image tagged with that hash
-    - if it doesn't exit, we just warn and pass on
-    - if it succeeds, we extract it to the `go-cache` workspace/folder
-- `cache-upload`
-  - compute a unique hash from something to identify the cache. For example, for `go` we would use `go.sum` file
-  - push the image tagged with that hash
-  - _possible optimization_: compare the cache content / image tarball, with the one we fetch, if it's similar, we don't even need to push
+* `cache-fetch`, which would consist of
+** compute a unique hash from something to identify the cache. For example, for `go` we would use `go.sum` file
+** try to fetch an image tagged with that hash
+*** if it doesn't exit, we just warn and pass on
+*** if it succeeds, we extract it to the `go-cache` workspace/folder
+* `cache-upload`
+** compute a unique hash from something to identify the cache. For example, for `go` we would use `go.sum` file
+** push the image tagged with that hash
+** _possible optimization_: compare the cache content / image tarball, with the one we fetch, if it's similar, we don't even need to push
 
 ==== Using `rsync`
 
