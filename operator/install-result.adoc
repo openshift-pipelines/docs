@@ -84,3 +84,10 @@ spec:
   server_port: 8080
   prometheus_port: 9090
 ----
+
+6. Expose Route Tekton Results API Service
++
+[source,yaml]
+----
+oc expose svc/tekton-results-api-service
+----
