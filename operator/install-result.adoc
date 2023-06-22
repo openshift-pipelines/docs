@@ -36,8 +36,7 @@ $ openssl req -x509 \
 +
 [source,bash]
 ----
-oc create secret tls -n ${NAMESPACE} tekton-results-tls \
---cert=cert.pem
+oc create secret tls -n ${NAMESPACE} tekton-results-tls --cert=cert.pem --key=key.pem
 ----
 
 4. Optional: Create a Persistent Volume Claim (PVC) if you need to store your logging data.
