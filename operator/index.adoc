@@ -6,3 +6,4 @@
 List of content around the https://github.com/tektoncd/operator[`tektoncd/operator`] component and the general OpenShift Pipelines operator lifecycle.
 
 - xref:troubleshooting.adoc[Troubleshooting]
+- xref:install-result.adoc[Installing Results]
