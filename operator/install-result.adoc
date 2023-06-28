@@ -89,5 +89,5 @@ spec:
 +
 [source,bash]
 ----
-oc expose -n ${NAMESPACE} svc/tekton-results-api-service
+oc create route -n ${NAMESPACE} passthrough tekton-results-api-service --service=tekton-results-api-service --port=8080
 ----
