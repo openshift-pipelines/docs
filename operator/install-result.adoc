@@ -1,4 +1,4 @@
-= Troubleshooting
+= Installing Result
 :toc: left
 :toclevels: 5
 :source-highlighter: rouge
