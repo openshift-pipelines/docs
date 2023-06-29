@@ -9,32 +9,30 @@
 == Query Results Using OPC CLI
 
 === Setting Route
-These instructions assume we already created some pipelineruns in our namespace. We also assume for now that `auth_disable` is set to true in TektonResult.
-+
+These instructions assume we already created some Pipelineruns in our namespace. It's also assumed that `auth_disable` is set to true in `TektonResult` CR..
 [source,bash]
 ----
 export NAMESPACE=results-testing
 ----
 
-First, let's get the route location
-+
+First, let's get the route location:
 [source,bash]
 ----
 RESULTS_API=$(oc get route  tekton-results-api-service  -n openshift-pipelines  --no-headers -o custom-columns=":spec.host"):443
 ----
 
-If self signed certificate was used during results installation, then pass --insecure flags to `opc results` commands.
+
+If self-signed certificate was used during results installation, then pass `--insecure` flags to `opc results` commands.
 
 
 === Getting Results List
-Next, we can run list of results stored which will contain pipelinruns data with below commands:
-+
+Next, we can get the list of results stored which contains the Pipelinruns data with the below commands:
 [source,bash]
 ----
 opc results   list --insecure  --addr ${RESULTS_API} ${NAMESPACE}
 ----
+
 We will receive output similar to below.
-+
 [source,bash]
 ----
 Name                                                          Start                                   Update
@@ -43,12 +41,11 @@ results-testing/results/ad7eb937-90cc-4510-8380-defe51ad793f  2023-06-29 02:49:3
 results-testing/results/d064ce6e-d851-4b4e-8db4-7605a23671e4  2023-06-29 02:49:45 +0530 IST           2023-06-29 02:49:56 +0530 IST
 ----
 
-Format of the result's `Name` field is {NAMESPACE}/results/{Pipelinerun UUID}.
+The format of the result's `Name` field is {NAMESPACE}/results/{Pipelinerun UUID}.
 
 
 === Getting Records List
-Now, we can list records associated with results which will have logs, taskruns and pipelineruns.
-+
+Now, we can list records associated with results which will have logs, Taskruns, and Pipelineruns.
 [source,bash]
 ----
 opc results   records list --insecure  --addr ${RESULTS_API} results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed
@@ -62,20 +59,18 @@ results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/records/04e2fbf2-86
 results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/records/e6eea2f9-ec80-388c-9982-74a018a548e4  results.tekton.dev/v1alpha2.Log         2023-06-29 02:50:05 +0530 IST           2023-06-29 02:50:05 +0530 IST
 ----
 
-Format of the record's `Name` field is {NAMESPACE}/results/{Run UUID}/records/{Run UUID}.
+The format of the record's `Name` field is {NAMESPACE}/results/{Run UUID}/records/{Run UUID}.
 
 
 === Fetching Runs YAML
-We can get pipelinerun yaml using below command:
-+
+We can get Yaml for Pipelinerun using the below command:
 [source,bash]
 ----
 opc results   records get --insecure  --addr ${RESULTS_API} results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/records/04e2fbf2-8653-405f-bc42-a262bcf02bed  | yq -r .data.value | base64 -d | yq -P '.'
 ----
 
 === Fetching Logs
-Similarly we can get pipelinerun logs by changing "records" to "logs" in the `Name` field of record associated with PipelineRun:
-+
+Similarly, we can get the logs of Pipelinerun by changing "records" to "logs" in the name of the record associated with PipelineRun:
 [source,bash]
 ----
 opc results   logs get --insecure  --addr ${RESULTS_API} results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/logs/04e2fbf2-8653-405f-bc42-a262bcf02bed  | yq -r .data | base64 -d
