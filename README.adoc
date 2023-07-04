@@ -25,5 +25,8 @@ engineers working on the project.
 
 == Pipeline as code https://pipelinesascode.com/[➡]
 
+== Results xref:results/index.adoc[➡]
+
+- xref:results/query-using-opc.adoc[Query Results Using OPC CLI]
 
 The upstream documentation for Pipeline as code is very good, so let's just go there: https://pipelinesascode.com/[pipelinesascode.com]
