@@ -19,14 +19,16 @@ engineers working on the project.
 - xref:pipeline/unprivileged-builds.adoc[Build container image with buildah, unprivileged]
 - xref:pipeline/cache-in-tekton.adoc[Caches "support" in tekton pipelines]
 
-== Triggers xref:triggers/index.adoc[➡]
-
-== Chains xref:chains/index.adoc[➡]
-
-== Pipeline as code https://pipelinesascode.com/[➡]
-
 == Results xref:results/index.adoc[➡]
 
 - xref:results/query-using-opc.adoc[Query Results Using OPC CLI]
+
+== Chains xref:chains/index.adoc[➡]c
+
+- xref:chains/hashicorp-integration-with-chains.adoc
+
+== Triggers xref:triggers/index.adoc[➡]
+
+== Pipeline as code https://pipelinesascode.com/[➡]
 
 The upstream documentation for Pipeline as code is very good, so let's just go there: https://pipelinesascode.com/[pipelinesascode.com]
