@@ -23,9 +23,10 @@ engineers working on the project.
 
 - xref:results/query-using-opc.adoc[Query Results Using OPC CLI]
 
-== Chains xref:chains/index.adoc[➡]c
+== Chains xref:chains/index.adoc[➡]
 
-- xref:chains/hashicorp-integration-with-chains.adoc
+- xref:chains/hashicorp-integration-with-chains.adoc[Hashicorp Integration with Tekton Chains
+]
 
 == Triggers xref:triggers/index.adoc[➡]
 
