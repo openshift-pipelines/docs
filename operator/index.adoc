@@ -7,3 +7,4 @@ List of content around the https://github.com/tektoncd/operator[`tektoncd/operat
 
 - xref:troubleshooting.adoc[Troubleshooting]
 - xref:install-result.adoc[Installing Results]
+- xref:high-availability.adoc[High Availability for Tekton Pipelines Controller]

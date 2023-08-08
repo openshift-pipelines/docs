@@ -11,6 +11,7 @@ engineers working on the project.
 
 - xref:operator/troubleshooting.adoc[Troubleshooting]
 - xref:operator/install-result.adoc[Installing Result]
+- xref:operator/high-availability.adoc[High Availability for Tekton Pipelines Controller]
 
 == Pipeline xref:pipeline/index.adoc[➡]
 
