@@ -1,0 +1,203 @@
+= High Availability for Tekton Pipelines Controller
+:toc: left
+:toclevels: 5
+:source-highlighter: rouge
+:docinfo: shared
+:docinfodir: ../common
+
+
+== High Availability for Tekton Pipelines Controller
+
+If you want to run Tekton Pipelines to support high concurrent workload
+scenarios, you need to follow following steps to enable high
+availability for `tekton-pipelines-controller`. With this approach, you
+divide the workqueue in buckets, and each replica owns a subset of those
+buckets and process the load if that replica is the leader of that
+bucket.
+
+[width="100%",cols="100%",]
+|===
+|*NOTE*: High Availability support for `tekton-pipelines-controller` has
+been added in `OpenShift Pipelines` from `v1.10.0` onwards.
+|===
+
+=== Enable High Availability With Operator on OpenShift:
+
+[arabic]
+. First, specify the number of buckets across which you want to
+distribute workqueue. The maximum supported value for bucket is `10`.
+You need to update the `config` CR with the required number of buckets.
+
+[source,shell]
+----
+oc edit tektonconfig config
+----
+
+[source,yaml]
+----
+apiVersion: operator.tekton.dev/v1alpha1
+kind: TektonConfig
+metadata:
+    name: config
+spec:
+    <<--->>
+    pipeline:
+        <<--->>
+        performance:
+            disable-ha: false
+            buckets: < buckets required >
+        <<--->>
+----
+
+[arabic, start=2]
+. This step is only required for `OpenShift Pipelines` releases `1.10.x`
+and `1.11.0`. This is not required for `v1.11.1` onwards.
+
+Now grab the list of all the tektoninstallerset available
+
+[source,shell]
+----
+oc get tektoninstallerset | grep pipeline-main-deployment
+
+pipeline-main-deployment-45m2s                   True 
+----
+
+Now edit the installerset which we got in previous command for removing
+one fields on tekton-pipelines-controller which is available in
+`spec.manifests` (This is required every time you do any change related
+to pipeline on tektonconfig)
+
+Remove the disable-ha flag in the args of container of
+tekton-pipelines-controller
+
+[source,shell]
+----
+oc edit tektoninstallerset pipeline-main-deployment-45m2s
+----
+
+[source,yaml]
+----
+apiVersion: operator.tekton.dev/v1alpha1
+kind: TektonInstallerSet
+metadata:
+    annotations:
+        operator.tekton.dev/target-namespace: openshift-pipelines
+spec:
+    manifests:
+    <<--->>
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+          name: tekton-pipelines-controller
+      spec:
+          template:
+              spec:
+                  containers:
+                  - args:
+                    <<--->>
+                    - -disable-ha
+                    - "false"            <<<< these two lines needs to be removed >>>>
+----
+
+[arabic, start=3]
+. Next step is to scale the `tekton-pipelines-controller` for having
+more replicas. (This is also recommended to not have more than 10
+replicas)
+
+[source,shell]
+----
+oc -n openshift-pipelines scale deployment/tekton-pipelines-controller --replicas=<no of replicas requires>
+----
+
+[arabic, start=4]
+. Now delete the existing leases so that old replica removes hold and
+new leases gets created which get acquired by different replicas.
+
+[source,shell]
+----
+oc delete -n openshift-pipelines $(oc get leases -n openshift-pipelines -o name | grep tekton-pipelines-controller)
+----
+
+Note:
+
+* If by chance the leases are not properly divided over multiple
+pods, you can try recreating them.
+* Configmap config-leader-election is
+by default getting used in knative controllers. So the change in data of
+this gets read by all other components too. It is fixed for
+pipelines-controller in
+https://issues.redhat.com/browse/SRVKP-3336[1.11.1] and for others in
+https://issues.redhat.com/browse/SRVKP-3377[1.12.0]
+* Need to modify
+tektoninstallerset (step 2) is a bug which is fixed in
+https://issues.redhat.com/browse/SRVKP-3335[1.11.1]
+
+=== Disable High Availability With Operator on OpenShift:
+
+[arabic]
+. First, scale down the `tekton-pipelines-controller` for replica `1`
+
+[source,shell]
+----
+oc -n openshift-pipelines scale deployment/tekton-pipelines-controller --replicas=1
+----
+
+[arabic, start=2]
+. Now remove the bucket field on the TektonConfig CR to remove the
+workqueue distribution
+
+[source,shell]
+----
+oc edit tektonconfig config
+----
+
+[source,yaml]
+----
+apiVersion: operator.tekton.dev/v1alpha1
+kind: TektonConfig
+metadata:
+    name: config
+spec:
+    <<--->>
+    pipeline:
+        <<--->>
+        performance:
+            disable-ha: false
+        <<--->>
+----
+
+[arabic, start=3]
+. Next is to delete the dangling leases which were acquired previously
+by the replicas
+
+[source,shell]
+----
+oc delete -n openshift-pipelines $(oc get leases -n openshift-pipelines -o name | grep tekton-pipelines-controller)
+----
+
+[arabic, start=4]
+. And to completely disable leader election and not creating leases for
+`tekton-pipelines-controller` pod, you can set `disable-ha` to `true` in
+TektonConfig CR (This is true in `OpenShift Pipelines` releases
+`v1.10.x` and `v1.11.0` because of
+https://issues.redhat.com/browse/SRVKP-3335[bug])
+
+[source,shell]
+----
+oc edit tektonconfig config
+----
+
+[source,yaml]
+----
+apiVersion: operator.tekton.dev/v1alpha1
+kind: TektonConfig
+metadata:
+    name: config
+spec:
+    <<--->>
+    pipeline:
+        <<--->>
+        performance:
+            disable-ha: true
+        <<--->>
+----
