@@ -50,8 +50,8 @@ spec:
 ----
 
 [arabic, start=2]
-. This step is only required for `OpenShift Pipelines` releases `1.10.x`
-and `1.11.0`. This is not required for `v1.11.1` onwards.
+. *This step is only required for `OpenShift Pipelines` releases `1.10.x`
+and `1.11.0`. This is not required for `v1.11.1` onwards.*
 
 Now grab the list of all the tektoninstallerset available
 
