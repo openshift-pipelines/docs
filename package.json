@@ -1,0 +1,26 @@
+{
+  "name": "openshift-pipelines-docs",
+  "description": "OpenShift Pipelines Unofficial Documentation",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openshift-pipelines/docs.git"
+  },
+  "scripts": {
+    "install-build": "npm i && npx antora antora-playbook.yml --stacktrace",
+    "build": "npx antora antora-playbook.yml --stacktrace"
+  },
+  "keywords": [
+    "Openshift",
+    "Pipelines",
+    "Tekton"
+  ],
+  "author": "Openshift Pipelines",
+  "dependencies": {
+    "@antora/cli": "^3.1.4",
+    "@antora/lunr-extension": "^1.0.0-alpha.8",
+    "@antora/site-generator": "^3.1.4",
+    "asciidoctor-emoji": "^0.5.0",
+    "uglify-js": "~3.17"
+  }
+}

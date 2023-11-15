@@ -1,0 +1,27 @@
+site:
+  title: Red Hat OpenShift Pipelines previews
+  url: https://docs.openshift-pipelines.org
+  start_page: docs::index.adoc
+urls:
+  latest_version_segment: latest
+content:
+  sources:
+    - url: .
+      edit_url: ~
+      branches: HEAD
+ui:
+  bundle:
+    url: ./ui-bundle.zip
+  supplemental_files: ./supplemental_ui
+
+asciidoc:
+  extensions:
+    - asciidoctor-emoji
+    - ./lib/tabs
+  attributes:
+    hide-uri-scheme: ''
+    product-name: 'OpenShift Pipelines'
+    short-name: 'Pipelines'
+    pipelines: 'OpenShift Pipelines'
+    toc: preamble
+    toc-title: ~

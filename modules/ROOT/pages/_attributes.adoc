@@ -1,0 +1,3 @@
+:moduledir: ..
+:branch: main
+:github-repo: https://github.com/openshift-pipelines/docs.git
