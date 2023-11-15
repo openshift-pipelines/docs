@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication practices with Tekton :: Red Hat OpenShift Pipelines previews</title>
+    <link rel="canonical" href="https://docs.openshift-pipelines.org/docs/latest/pipeline/auth.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+<link rel="stylesheet" href="../../../_/css/extra.css">
+<link rel="stylesheet" href="../../../_/css/custom.css">
+<link rel="stylesheet" href="../../../_/css/tabs.css">
+<link rel="stylesheet" href="../../../_/font-awesome-4.7.0/css/font-awesome.min.css">
+<link rel="icon" href="../../../_/img/favicon.ico" type="image/x-icon">
+  </head>
+  <body class="article">
+<header class="header" role="banner">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <button class="navbar-burger" data-target="topbar-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <img src="../../../_/img/pipelines-icon.png" class="navbar-logo" alt="OpenShift Pipelines icon">
+        <a href="">OpenShift Pipelines - Unofficial documentation</a>
+      </div>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://docs.openshift-pipelines.org">Home</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="#">Upstream Projects</a>
+              <div class="navbar-dropdown">
+                  <a class="navbar-item" href="https://tekton.dev/docs">Tekton</a>
+              </div>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="main-wrapper">
+  <div class="navigation-container" data-component="docs" data-version="main">
+  <aside class="navigation">
+    <div class="panels">
+<div class="navigation-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Documentation</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Pipelines</span>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="auth.html">Authentication practices with Tekton</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="unprivileged-builds.html">Build container image with buildah, unprivileged</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="cache-in-tekton.html">Caches "support" in tekton pipelines</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Operator</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../operator/troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Results</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../results/query-using-opc.html">Query Results Using OPC CLI</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Chains</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../chains/hashicorp-integration-with-chains.html">Hashicorp Integration with Tekton Chains</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="navigation-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Documentation</span>
+    <span class="version">main</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">Documentation</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="../index.html">main</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+  <div class="main-view-and-toolbar">
+    <div class="toolbar" role="navigation">
+  <button class="navigation-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="crumbs" aria-label="breadcrumbs">
+  <ul>
+    <li class="crumb"><a href="../index.html">Documentation</a></li>
+    <li class="crumb">Pipelines</li>
+    <li class="crumb"><a href="auth.html">Authentication practices with Tekton</a></li>
+  </ul>
+</nav>
+</div>
+    <div class="main-view-and-toc">
+        <main class="main">
+          <article class="doc">
+<h1>Authentication practices with Tekton</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <em>upstream</em> official documentation around authentication is available <a href="https://tekton.dev/docs/pipelines/auth/">here</a>. It mainly focus on authenticating through annotated secrets and service accounts. This document will try to explore the different way to use "secrets" for authentication in your <code>Pipeline</code> and <code>Task</code>.</p>
+</div>
+<div class="paragraph">
+<p>There is at least three ways to use secrets to authenticate to Github or Docker or.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Using secrets and workspaces <strong>highly recommended</strong></p>
+</li>
+<li>
+<p>Using a <code>ServiceAccount</code> <strong>recommended</strong></p>
+</li>
+<li>
+<p>Using <code>VolumeMount</code> <strong>not recommended</strong></p>
+</li>
+</ul>
+</div>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"></div>
+<ul class="sectlevel1">
+<li><a href="#secrets-and-workspaces">Using <code>Secret</code>(s) and <code>Workspace</code>(s)</a>
+<ul class="sectlevel2">
+<li><a href="#git-clone">A <code>git clone</code> example</a></li>
+<li><a href="#docker-configuration">A docker configuration</a></li>
+<li><a href="#_with_optional_workspaces">With optional workspaces</a></li>
+<li><a href="#_with_git_credentials">With <code>git-credentials</code></a></li>
+</ul>
+</li>
+<li><a href="#serviceaccounts">Using <code>ServiceAccount</code>(s)</a>
+<ul class="sectlevel2">
+<li><a href="#annotations">Annotations</a></li>
+<li><a href="#link-secret-to-serviceaccount">Link <code>Secret</code>(s) to <code>ServiceAccount</code>(s)</a></li>
+<li><a href="#specify-serviceaccount-on-runs">Specify <code>SerivceAccount</code>(s) on <code>PipelineRun</code>/<code>TaskRun</code>(s)</a></li>
+</ul>
+</li>
+<li><a href="#volumemounts">Using <code>VolumeMount</code>(s)</a></li>
+</ul>
+</div>
+</div>
+<div class="sect1">
+<h2 id="secrets-and-workspaces"><a class="anchor" href="#secrets-and-workspaces"></a>Using <code>Secret</code>(s) and <code>Workspace</code>(s)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is the most flexible approach, especially if you use the <em>optional</em> workspace feature.
+The general idea behind this approach is:
+- We use a workspace to bind a secret
+- In the <code>Task</code> definition, we tell the command line (through a flag or an environment variable) where to find the secret content (aka the authentication content).</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ll take the example with a very simple <code>git-clone</code> Task, as well as a very simple <code>docker build</code>, but it can apply to anything else.</p>
+</div>
+<div class="sect2">
+<h3 id="git-clone"><a class="anchor" href="#git-clone"></a>A <code>git clone</code> example</h3>
+<div class="paragraph">
+<p>For this example, we assume we are using <code>git</code> with <code>ssh</code> to authenticate. Later in the document, we will show different approaches.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-clone
+spec:
+  workspaces:
+    - name: output
+      description: The git repo will be cloned onto the volume backing this Workspace.
+    - name: ssh-directory # (1)
+      description: |
+        A .ssh directory with private key, known_hosts, config, etc. Copied to
+        the user's home before git commands are executed. Used to authenticate
+        with the git remote when performing the clone. Binding a Secret to this
+        Workspace is strongly recommended over other volume types
+  params:
+    - name: url
+      description: Repository URL to clone from.
+      type: string
+    - name: revision
+      description: Revision to checkout. (branch, tag, sha, ref, etc...)
+      type: string
+      default: ""
+    - name: gitInitImage
+      description: The image providing the git-init binary that this Task runs.
+      type: string
+      default: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.37.0"
+  results:
+    - name: commit
+      description: The precise commit SHA that was fetched by this Task.
+    - name: url
+      description: The precise URL that was fetched by this Task.
+  steps:
+    - name: clone
+      image: "$(params.gitInitImage)"
+      script: |
+        #!/usr/bin/env sh
+        set -eu
+        # This is necessary for recent version of git
+        git config --global --add safe.directory '*'
+        # (2)
+        cp -R "$(workspaces.ssh-directory.path)" "${HOME}"/.ssh
+        chmod 700 "${HOME}"/.ssh
+        chmod -R 400 "${HOME}"/.ssh/*
+        CHECKOUT_DIR="$(workspaces.output.path)/"
+        /ko-app/git-init \
+          -url="$(params.url)" \
+          -revision="$(params.revision)" \
+          -path="${CHECKOUT_DIR}"
+        cd "${CHECKOUT_DIR}"
+        RESULT_SHA="$(git rev-parse HEAD)"
+        EXIT_CODE="$?"
+        if [ "${EXIT_CODE}" != 0 ] ; then
+          exit "${EXIT_CODE}"
+        fi
+        printf "%s" "${RESULT_SHA}" &gt; "$(results.commit.path)"
+        printf "%s" "$(params.url)" &gt; "$(results.url.path)"</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Defines the workspace ; here the name is <code>ssh-directory</code>, and the description explain how should the secret be created.
+An example of an ssh secret with a <code>ed25519</code> private key.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: my-github-ssh-credentials
+type: Opaque
+data:
+  id_ed25519: # […]
+  known_hosts: # […]
+  # config: # […] # optional</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This can be created with the following command-line:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ kubectl create secret generic my-github-ssh-credentials \
+  --from-file=id_ed25519=/path/to/.ssh/id_ed25519 \
+  --from-file=known_hosts=/path/to/.ssh/known_hosts
+secret/my-github-ssh-credentials created</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>In the <code>script</code>, we are copying the content of the secret (as a folder) to <code>${HOME}/.ssh</code> which is the standard folder where <code>ssh</code> (and thus <code>git</code>) will look for credentials.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ tkn task start git-clone \
+      --param url=git@github.com:vdemeester/buildkit-tekton \
+      --workspace name=output,emptyDir="" \
+      --workspace name=ssh-directory,secret=my-github-ssh-credentials \
+      --use-param-defaults --showlog
+TaskRun started: git-clone-run-kt7fv
+Waiting for logs to be available...
+[clone] {"level":"warn","ts":1657102809.7319033,"caller":"git/git.go:273","msg":"URL(\"git@github.com:vdemeester/buildkit-tekton\") appears to need SSH authentication but no SSH credentials have been provided"}
+[clone] {"level":"info","ts":1657102813.1506214,"caller":"git/git.go:178","msg":"Successfully cloned git@github.com:vdemeester/buildkit-tekton @ e6afd054a907ee447a040c6e95f23fabe038ce6d (grafted, HEAD) in path /workspace/output/"}
+[clone] {"level":"info","ts":1657102813.1600826,"caller":"git/git.go:217","msg":"Successfully initialized and updated submodules in path /workspace/output/"}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that the warning <code>URL(\"<a href="mailto:git@github.com">git@github.com</a>:vdemeester/buildkit-tekton\") appears to need SSH authentication but no SSH credentials have been provided</code> appears because the entrypoint didn&#8217;t see any credentials coming from the annotated secrets attached to a <code>ServiceAccount</code> (see <a href="#serviceaccounts">Using <code>ServiceAccount</code>(s)</a>). It can safely be ignored in that case.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="docker-configuration"><a class="anchor" href="#docker-configuration"></a>A docker configuration</h3>
+<div class="paragraph">
+<p>For this example, we will be using an existing docker configuration file to be used inside a <code>Task</code>, similar to the <a href="#git-clone">A <code>git clone</code> example</a> example.
+The <code>Task</code> definition is slightly similar to the <a href="#git-clone">A <code>git clone</code> example</a> one. Here we will use <code>skopeo</code> to copy an image to our own repository — it could be applied to other tools (<code>podman</code>, <code>buildah</code>, <code>docker</code>, …), basically any tool that is capable of reading a docker client configuration file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: skopeo-copy
+spec:
+  workspaces:
+    - name: dockerconfig # (1)
+      description: Includes a docker `config.json`
+  steps:
+    - name: clone
+      image: quay.io/skopeo/stable:v1.8.0
+      env:
+      - name: DOCKER_CONFIG
+        value: $(workspaces.dockerconfig.path) # (2)
+      script: |
+        #!/usr/bin/env sh
+        set -eu
+        skopeo copy docker://docker.io/library/ubuntu:latest docker://docker.io/vdemeester/ubuntu-copy:latest</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Similar to <a href="#git-clone">A <code>git clone</code> example</a>, we define a workspace that should contain a <code>config.json</code> file. For a secret, this means a key named <code>config.json</code>.
+An example of an ssh secret with a <code>ed25519</code> private key.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+type: Opaque
+data:
+  config.json: # […]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This can be created with the following command-line:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ kubectl create secret generic regcred \
+  --from-file=config.json=/path/to/.docker/config.json
+secret/regcred created</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Here we are just setting the <code>DOCKER_CONFIG</code> environment variable to point to the <code>dockerconfig</code> workspace path. <code>skopeo</code> (as a lot of docker-ish client) do read this environment variable to get the docker client configuration information, and in our case, the authentication informations.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ tkn task start skopeo-copy --workspace name=dockerconfig,secret=regcred --showlog
+TaskRun started: skopeo-copy-run-cfg7l
+Waiting for logs to be available...
+[clone] DOCKER_CONFIG=/workspace/dockerconfig
+Getting image source signatures
+[clone] Copying blob sha256:405f018f9d1d0f351c196b841a7c7f226fb8ea448acd6339a9ed8741600275a2
+[clone] Copying config sha256:27941809078cc9b2802deb2b0bb6feed6c236cde01e487f200e24653533701ee
+[clone] Writing manifest to image destination
+[clone] Storing signatures</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_with_optional_workspaces"><a class="anchor" href="#_with_optional_workspaces"></a>With optional workspaces</h3>
+<div class="paragraph">
+<p>This approach is extremely similar to the one above <strong>but</strong> using the optional feature of <a href="https://tekton.dev/docs/pipelines/workspaces/#using-workspaces-in-tasks">workspaces</a>. In a gist, this means a <code>Workspace</code> <em>might</em> be bound to it (a.k.a. mounted as a volume in the <code>Pod</code>/<code>Container</code>) ; but it could also not be present.</p>
+</div>
+<div class="paragraph">
+<p>The only difference here will be, to make sure our <code>Task</code> takes this <em>optional</em> property into account. The <a href="https://hub.tekton.dev/tekton/task/git-clone"><code>git-clone</code></a> upstream <code>Task</code> shows an example of that. Let&#8217;s adapt the <a href="#git-clone">A <code>git clone</code> example</a> example with optional <code>Workspace</code> support.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-clone
+spec:
+  workspaces:
+    - name: output
+      description: The git repo will be cloned onto the volume backing this Workspace.
+    - name: ssh-directory # (1)
+      description: |
+        A .ssh directory with private key, known_hosts, config, etc. Copied to
+        the user's home before git commands are executed. Used to authenticate
+        with the git remote when performing the clone. Binding a Secret to this
+        Workspace is strongly recommended over other volume types
+  params:
+    - name: url
+      description: Repository URL to clone from.
+      type: string
+    - name: revision
+      description: Revision to checkout. (branch, tag, sha, ref, etc...)
+      type: string
+      default: ""
+    - name: gitInitImage
+      description: The image providing the git-init binary that this Task runs.
+      type: string
+      default: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.37.0"
+  results:
+    - name: commit
+      description: The precise commit SHA that was fetched by this Task.
+    - name: url
+      description: The precise URL that was fetched by this Task.
+  steps:
+    - name: clone
+      image: "$(params.gitInitImage)"
+      script: |
+        #!/usr/bin/env sh
+        set -eu
+        # This is necessary for recent version of git
+        git config --global --add safe.directory '*'
+        # (2)
+        if [ "$(workspaces.ssh-directory.bound)" = "true" ] ; then
+          cp -R "$(workspaces.ssh-directory.path)" "${HOME}"/.ssh
+          chmod 700 "${HOME}"/.ssh
+          chmod -R 400 "${HOME}"/.ssh/*
+        fi
+        CHECKOUT_DIR="$(workspaces.output.path)/"
+        /ko-app/git-init \
+          -url="$(params.url)" \
+          -revision="$(params.revision)" \
+          -path="${CHECKOUT_DIR}"
+        cd "${CHECKOUT_DIR}"
+        RESULT_SHA="$(git rev-parse HEAD)"
+        EXIT_CODE="$?"
+        if [ "${EXIT_CODE}" != 0 ] ; then
+          exit "${EXIT_CODE}"
+        fi
+        printf "%s" "${RESULT_SHA}" &gt; "$(results.commit.path)"
+        printf "%s" "$(params.url)" &gt; "$(results.url.path)"</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Defines the workspace ; here the name is <code>ssh-directory</code>, and the description explain how should the secret be created. The example in <a href="#git-clone">A <code>git clone</code> example</a> apply here as well.</p>
+</li>
+<li>
+<p>In the <code>script</code>, we are conditionally copying the content of the secret (as a folder) to <code>${HOME}/.ssh</code> which is the standard folder where <code>ssh</code> (and thus <code>git</code>) will look for credentials. If the <code>Workspace</code> is bound we copy, if it&#8217;s not bound, we don&#8217;t do anything.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The main advantage of using optionnal <code>Workspace</code> is that it makes your <code>Task</code> a bit more flexible. For example, with <code>git-clone</code>, if you are going to clone a publicly available git repository, you won&#8217;t bind a <code>Secret</code> to the <code>Workspace</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_with_git_credentials"><a class="anchor" href="#_with_git_credentials"></a>With <code>git-credentials</code></h3>
+<div class="paragraph">
+<p>We can apply both the approach with and without the <em>optional</em> <code>Workspace</code> with other means of authenticating than <code>ssh</code> keys for <code>git-clone</code>, for example. Git has a notion of <a href="https://git-scm.com/docs/git-credential/"><code>git-credential</code></a> that could be used here. Using <em>optional</em> workspace as above, it could look like the following.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">        if [ "$(workspaces.basic_auth.bound)" = "true" ] ; then
+          cp "$(workspaces.basic_auth.path)/.git-credentials" "${HOME}/.git-credentials"
+          cp "$(workspaces.basic_auth.path)/.gitconfig" "${HOME}/.gitconfig"
+          chmod 400 "${HOME}/.git-credentials"
+          chmod 400 "${HOME}/.gitconfig"
+        fi</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="serviceaccounts"><a class="anchor" href="#serviceaccounts"></a>Using <code>ServiceAccount</code>(s)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>ServiceAccount</code> approach is the most widely documentated, especially <a href="https://tekton.dev/docs/pipelines/auth/">upstream</a>. The goal here is not to paraphrase the upstream documentation, so we&#8217;ll just describe what the flow is.</p>
+</div>
+<div class="paragraph">
+<p>This methods constits, in a gist, of the following:
+- <code>Secret</code>(s) annotated specifcally, see <a href="#annotations">Annotations</a>
+- <code>ServiceAccount</code>(s) that are linked to those annotated <code>Secret</code>(s), see <a href="#link-secret-to-serviceaccount">Link <code>Secret</code>(s) to <code>ServiceAccount</code>(s)</a>
+- <code>PipelineRun</code>(s) or <code>TaskRun</code>(s) using this/those <code>ServiceAccount</code>(s), see <a href="#specify-serviceaccount-on-runs">Specify <code>SerivceAccount</code>(s) on <code>PipelineRun</code>/<code>TaskRun</code>(s)</a></p>
+</div>
+<div class="sect2">
+<h3 id="annotations"><a class="anchor" href="#annotations"></a>Annotations</h3>
+<div class="paragraph">
+<p>Tetkon support two different type of authentication for secrets : <code>git</code> and <code>docker</code>. The annotation "reflect" this :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>tekton.dev/git-{}</code> mark the annotated secret as a <code>git</code> secret.</p>
+</li>
+<li>
+<p><code>tekton.dev/docker-{}</code> mark the annotated secret as a <code>docker</code> secret.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In addition, Tekton supports different types of secret per type of authentication. See the <a href="https://kubernetes.io/docs/concepts/configuration/secret/#secret-types">Types of Secrets</a> kubernetes documentation for more details on those secrets.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>For <code>git</code> secrets:</p>
+</li>
+<li>
+<p><code>kubernetes.io/basic-auth</code> : basic authentication</p>
+</li>
+<li>
+<p><code>kubernetes.io/ssh-auth</code> : ssh based authentication (keys, …)</p>
+</li>
+<li>
+<p>For <code>docker</code> secrets:</p>
+</li>
+<li>
+<p><code>kubernetes.io/basic-auth</code> : basic authentications</p>
+</li>
+<li>
+<p><code>kubernetes.io/dockercfg</code> : serialized <code>~/.dockercfg</code> file</p>
+</li>
+<li>
+<p><code>kubernetes.io/dockerconfigjson</code> : serialized <code>~/.docker/config.json</code> file</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>We&#8217;ll just show a set of example of annotated secrets with a quick description of them.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Almost all the example below are using <code>stringData</code>, which are direct content of the secret (visible for everybody that can get <code>Secret</code>). They can also all work with <code>data</code>, which is the <code>base64</code> encoded version of the data, that gives a little bit more obfuscation to the <code>Secrets</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><span class="underline">basic authentication for <code>git</code></span> : for gitlab.com as well as github.com. It seems not very secure to use the same user/password for authenticating different git provider, but that&#8217;s just to show that a <code>Secret</code> can be used to target multiple host.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    tekton.dev/git-0: https://github.com
+    tekton.dev/git-1: https://gitlab.com
+type: kubernetes.io/basic-auth
+stringData:
+  username: &lt;cleartext username&gt;
+  password: &lt;cleartext password&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><span class="underline">ssh authentication for <code>git</code></span>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    tekton.dev/git-0: github.com
+type: kubernetes.io/ssh-auth
+stringData:
+  ssh-privatekey: &lt;private-key&gt;
+  # This is non-standard, but its use is encouraged to make this more secure.
+  # Omitting this results in the server's public key being blindly accepted.</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><span class="underline">basic authentication for <code>docker</code></span></p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    tekton.dev/docker-0: https://gcr.io
+type: kubernetes.io/basic-auth
+stringData:
+  username: &lt;cleartext username&gt;
+  password: &lt;cleartext password&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><span class="underline"><code>kubernetes.io/dockerconfigjson</code> authentication for <code>docker</code></span>. This type of secret (with <code>kubernetes.io/dockercfg</code>) do not need to be annotated as it can contain authentication for multiple hosts.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: # base64 encoded content of a docker `config.json` file</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It can be created easily with the following command-line</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ kubectl create secret generic regcred \
+          --from-file=.dockerconfigjson=&lt;path/to/.docker/config.json&gt; \
+          --type=kubernetes.io/dockerconfigjson`.</code></pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="link-secret-to-serviceaccount"><a class="anchor" href="#link-secret-to-serviceaccount"></a>Link <code>Secret</code>(s) to <code>ServiceAccount</code>(s)</h3>
+<div class="paragraph">
+<p>To link a <code>Secret</code> to a <code>ServiceAccount</code>, you need to reference the <code>Secret</code>, by name, in the <code>secrets</code> field of the <code>ServiceAccount</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: build-bot
+secrets:
+  - name: regcred
+  - name: a-git-auth-secret</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="specify-serviceaccount-on-runs"><a class="anchor" href="#specify-serviceaccount-on-runs"></a>Specify <code>SerivceAccount</code>(s) on <code>PipelineRun</code>/<code>TaskRun</code>(s)</h3>
+<div class="paragraph">
+<p>To add a <code>ServiceAccount</code> to a <code>PipelineRun</code> or a <code>TaskRun</code> you can use the <code>serviceAccountName</code> field.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># For a TaskRun
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: build-with-basic-auth
+spec:
+  serviceAccountName: build-bot
+  taskRef:
+    name: demo-task
+  # ...
+---
+# For a PipelineRun
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: demo-pipeline
+  namespace: default
+spec:
+  serviceAccountName: build-bot
+  pipelineRef:
+    name: demo-pipeline
+  # […]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is also possible to use <a href="https://github.com/tektoncd/cli"><code>tkn</code></a> to achieve the same.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">---
+# For a TaskRun
+$ tkn task start demo-task --serviceaccount build-bot
+# For a PipelineRun
+$ tkn pipeline start demo-pipeline --serviceaccount build-bot --param # […]
+---</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="volumemounts"><a class="anchor" href="#volumemounts"></a>Using <code>VolumeMount</code>(s)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Because this solution is <strong>highly</strong> discouraged, mainly due to the fact that <code>Volume</code> and <code>VolumeMount</code> might go away in the API, see <a href="https://github.com/tektoncd/pipeline/issues/2058">Remove "volumes" from Task before V1</a>, we&#8217;ll only scratch the surface on how it <em>would work</em>.</p>
+</div>
+<div class="paragraph">
+<p>The idea of this solution is very similar to <a href="#secrets-and-workspaces">Using <code>Secret</code>(s) and <code>Workspace</code>(s)</a> but using <code>Volume</code> and <code>VolumeMount</code> instead. You wount a <code>Secret</code> in a <code>Volume</code> using <code>VolumeMount</code> in the <code>Task</code>, and you act based on the path it is mounted on to copy the secrets to the right place.</p>
+</div>
+</div>
+</div>
+</article>
+        </main>
+            </div>
+  </div>
+</div><footer class="footer">
+  <p>Adapted from Antora default UI, (c) 2019</p>
+</footer>
+<script src="../../../_/js/site.js"></script>
+<script src="../../../_/js/vendor/highlight.js"></script>
+<script src="../../../_/js/tabsBehavior.js"></script>
+<script>hljs.initHighlighting()</script>
+  </body>
+</html>

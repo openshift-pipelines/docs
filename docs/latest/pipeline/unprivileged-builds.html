@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build container image with buildah, unprivileged :: Red Hat OpenShift Pipelines previews</title>
+    <link rel="canonical" href="https://docs.openshift-pipelines.org/docs/latest/pipeline/unprivileged-builds.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+<link rel="stylesheet" href="../../../_/css/extra.css">
+<link rel="stylesheet" href="../../../_/css/custom.css">
+<link rel="stylesheet" href="../../../_/css/tabs.css">
+<link rel="stylesheet" href="../../../_/font-awesome-4.7.0/css/font-awesome.min.css">
+<link rel="icon" href="../../../_/img/favicon.ico" type="image/x-icon">
+  </head>
+  <body class="article">
+<header class="header" role="banner">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <button class="navbar-burger" data-target="topbar-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <img src="../../../_/img/pipelines-icon.png" class="navbar-logo" alt="OpenShift Pipelines icon">
+        <a href="">OpenShift Pipelines - Unofficial documentation</a>
+      </div>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://docs.openshift-pipelines.org">Home</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="#">Upstream Projects</a>
+              <div class="navbar-dropdown">
+                  <a class="navbar-item" href="https://tekton.dev/docs">Tekton</a>
+              </div>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="main-wrapper">
+  <div class="navigation-container" data-component="docs" data-version="main">
+  <aside class="navigation">
+    <div class="panels">
+<div class="navigation-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Documentation</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Pipelines</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="auth.html">Authentication practices with Tekton</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="unprivileged-builds.html">Build container image with buildah, unprivileged</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="cache-in-tekton.html">Caches "support" in tekton pipelines</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Operator</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../operator/troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Results</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../results/query-using-opc.html">Query Results Using OPC CLI</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Chains</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../chains/hashicorp-integration-with-chains.html">Hashicorp Integration with Tekton Chains</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="navigation-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Documentation</span>
+    <span class="version">main</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">Documentation</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="../index.html">main</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+  <div class="main-view-and-toolbar">
+    <div class="toolbar" role="navigation">
+  <button class="navigation-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="crumbs" aria-label="breadcrumbs">
+  <ul>
+    <li class="crumb"><a href="../index.html">Documentation</a></li>
+    <li class="crumb">Pipelines</li>
+    <li class="crumb"><a href="unprivileged-builds.html">Build container image with buildah, unprivileged</a></li>
+  </ul>
+</nav>
+</div>
+    <div class="main-view-and-toc">
+        <main class="main">
+          <article class="doc">
+<h1>Build container image with buildah, unprivileged</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This "living" document is trying to document the different ways to build container images using buildah, in an unprivileged way. Please note it is also possible to build container images without using buildah and any container in container setup (document soon to be written and published).</p>
+</div>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"></div>
+<ul class="sectlevel1">
+<li><a href="#current-status">Current status</a>
+<ul class="sectlevel2">
+<li><a href="#_openshift_pipelines_1_8">OpenShift Pipelines 1.8</a></li>
+</ul>
+</li>
+<li><a href="#run-as-build-user">Run as the <code>build</code> user</a>
+<ul class="sectlevel2">
+<li><a href="#_taskrun"><code>TaskRun</code></a></li>
+<li><a href="#_pipelinerun"><code>PipelineRun</code></a></li>
+<li><a href="#_known_issues">Known issues</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect1">
+<h2 id="current-status"><a class="anchor" href="#current-status"></a>Current status</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before starting to dig into solutions, let&#8217;s "asses" what is the default behavior in some OpenShift Pipelines versions (as this might change over time).</p>
+</div>
+<div class="sect2">
+<h3 id="_openshift_pipelines_1_8"><a class="anchor" href="#_openshift_pipelines_1_8"></a>OpenShift Pipelines 1.8</h3>
+<div class="paragraph">
+<p>In 1.8, the default service account (by default) is <code>pipeline</code> SA and has a <em>custom</em>  <code>pipelines-scc</code> SCC (<a href="https://docs.openshift.com/container-platform/4.11/authentication/managing-security-context-constraints.html">Security Context Constraints</a>). This SCC is very similar to anyuid ; the two differences are the <code>SETFCAP</code> allowed capability and the <code>MustRunAs</code> on <code>fsGroup</code> instead of <code>RunAsAny</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-diff hljs" data-lang="diff">--- anyuid.yaml 2022-11-15 15:31:07.961911083 +0100
++++ pipelines-scc.yaml  2022-11-15 15:31:16.433975322 +0100
+@@ -5,11 +5,12 @@
+ allowHostPorts: false
+ allowPrivilegeEscalation: true
+ allowPrivilegedContainer: false
+-allowedCapabilities: null
++allowedCapabilities:
++- SETFCAP
+ apiVersion: security.openshift.io/v1
+ defaultAddCapabilities: null
+ fsGroup:
+-  type: RunAsAny
++  type: MustRunAs
+ groups:
+ - system:cluster-admins
+ kind: SecurityContextConstraints</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This means that <code>buildah</code> task in the cluster <strong>can</strong> run as <code>root</code> — and to work they need to run as <code>root</code>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="run-as-build-user"><a class="anchor" href="#run-as-build-user"></a>Run as the <code>build</code> user</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As documented on the <a href="https://github.com/containers/buildah/blob/main/docs/tutorials/05-openshift-rootless-build.md">buildah repository</a>, the <code>buildah</code> image comes with a specific user, <code>build</code> (uid <code>1000</code>) that has everything setup to be able to run build inside the container. This is true for both the <a href="https://catalog.redhat.com/software/containers/ubi8/buildah/602686f7b16b1eb2e30807ee?container-tabs=dockerfile">supported buildah image</a> as well as the <a href="https://github.com/containers/buildah/blob/main/contrib/buildahimage/Containerfile">community one</a>.</p>
+</div>
+<div class="paragraph">
+<p>To be able to run this on OpenShift Pipelines, you need to be able to ask for a specific user in your <code>Task</code> and, well, that&#8217;s pretty much it.</p>
+</div>
+<div class="paragraph">
+<p>In 1.8, the <code>pipeline</code> SA already allow to use a user id outside of the namespace range, but we can make sure this will work no matter what OpenShift Pipelines ships by defining our own SCC and ServiceAccount.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1 <i class="conum" data-value="1"></i><b>(1)</b>
+kind: ServiceAccount
+metadata:
+  name: pipelines-sa-userid-1000
+---
+kind: SecurityContextConstraints <i class="conum" data-value="2"></i><b>(2)</b>
+metadata:
+  annotations:
+  name: pipelines-scc-userid-1000
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegeEscalation: false
+allowPrivilegedContainer: false
+allowedCapabilities: null
+apiVersion: security.openshift.io/v1
+defaultAddCapabilities: null
+fsGroup:
+  type: MustRunAs
+groups:
+- system:cluster-admins
+priority: 10
+readOnlyRootFilesystem: false
+requiredDropCapabilities:
+- MKNOD
+runAsUser: <i class="conum" data-value="3"></i><b>(3)</b>
+  type: MustRunAs
+  uid: 1000
+seLinuxContext:
+  type: MustRunAs
+supplementalGroups:
+  type: RunAsAny
+users: []
+volumes:
+- configMap
+- downwardAPI
+- emptyDir
+- persistentVolumeClaim
+- projected
+- secret
+---
+apiVersion: rbac.authorization.k8s.io/v1 <i class="conum" data-value="4"></i><b>(4)</b>
+kind: ClusterRole
+metadata:
+  name: pipelines-scc-userid-1000-clusterrole
+rules:
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - pipelines-scc-userid-1000
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+---
+apiVersion: rbac.authorization.k8s.io/v1 <i class="conum" data-value="5"></i><b>(5)</b>
+kind: RoleBinding
+metadata:
+  name: pipelines-scc-userid-1000-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pipelines-scc-userid-1000-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: pipelines-sa-userid-1000</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This is the service account we&#8217;ll use later on.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This is the custom SCC, based of <code>restricted</code> with only the <code>runAsUser</code> change</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>This is the most important part of the SCC. Here we are "enforcing" any Pod that will get this SCC attached (through the ServiceAccount) to run as userid 100 (and not anything else).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>This is the ClusterRole the will use our SCC.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>This binds our ClusterRole (that uses our SCC) to the ServiceAccount we created earlier.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>With this setup, any Pod that runs with the <code>pipelines-sa-userid-1000</code> service account will be able to run as userid <code>1000</code>, and only that userid.</p>
+</div>
+<div class="paragraph">
+<p>The next step is to define our <code>buildah</code> Task to use the build (<code>1000</code> userid) user. We are copying the <code>ClusterTask</code> that OpenShift Pipelines ships and do small modifications. <em>Ideally, this would also be shipped with OpenShift Pipelines, somehow</em>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: buildah-as-user
+  # […]
+spec:
+  description: &gt;-
+    Buildah task builds source into a container image and
+    then pushes it to a container registry.
+    Buildah Task builds source into a container image using Project Atomic's
+    Buildah build tool.It uses Buildah's support for building from Dockerfiles,
+    using its buildah bud command.This command executes the directives in the
+    Dockerfile to assemble a container image, then pushes that image to a
+    container registry.
+  params:
+  - name: IMAGE
+    description: Reference of the image buildah will produce.
+  - name: BUILDER_IMAGE
+    description: The location of the buildah builder image.
+    default: registry.redhat.io/rhel8/buildah@sha256:99cae35f40c7ec050fed3765b2b27e0b8bbea2aa2da7c16408e2ca13c60ff8ee
+  - name: STORAGE_DRIVER
+    description: Set buildah storage driver
+    default: vfs
+  - name: DOCKERFILE
+    description: Path to the Dockerfile to build.
+    default: ./Dockerfile
+  - name: CONTEXT
+    description: Path to the directory to use as context.
+    default: .
+  - name: TLSVERIFY
+    description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
+    default: "true"
+  - name: FORMAT
+    description: The format of the built container, oci or docker
+    default: "oci"
+  - name: BUILD_EXTRA_ARGS
+    description: Extra parameters passed for the build command when building images.
+    default: ""
+  - description: Extra parameters passed for the push command when pushing images.
+    name: PUSH_EXTRA_ARGS
+    type: string
+    default: ""
+  - description: Skip pushing the built image
+    name: SKIP_PUSH
+    type: string
+    default: "false"
+  results:
+  - description: Digest of the image just built.
+    name: IMAGE_DIGEST
+    type: string
+  workspaces:
+  - name: source
+  steps:
+  - name: build
+    securityContext:
+      runAsUser: 1000 <i class="conum" data-value="1"></i><b>(1)</b>
+    image: $(params.BUILDER_IMAGE)
+    workingDir: $(workspaces.source.path)
+    script: |
+      echo "Running as USER ID `id`" <i class="conum" data-value="2"></i><b>(2)</b>
+      buildah --storage-driver=$(params.STORAGE_DRIVER) bud \
+        $(params.BUILD_EXTRA_ARGS) --format=$(params.FORMAT) \
+        --tls-verify=$(params.TLSVERIFY) --no-cache \
+        -f $(params.DOCKERFILE) -t $(params.IMAGE) $(params.CONTEXT)
+      [[ "$(params.SKIP_PUSH)" == "true" ]] &amp;&amp; echo "Push skipped" &amp;&amp; exit 0
+      buildah --storage-driver=$(params.STORAGE_DRIVER) push \
+        $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
+        --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE) \
+        docker://$(params.IMAGE)
+      cat $(workspaces.source.path)/image-digest | tee /tekton/results/IMAGE_DIGEST
+    volumeMounts:
+    - name: varlibcontainers
+      mountPath: /home/build/.local/share/containers
+    volumeMounts:
+    - name: varlibcontainers
+      mountPath: /home/build/.local/share/containers
+  volumes:
+  - name: varlibcontainers
+    emptyDir: {}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This is where we explicitly ask to run the container as the user id <code>1000</code> which correspond to the <code>build</code> user in the buildah image.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>We print the the user id, just to showcase we are running the process as user id <code>1000</code>.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now, we can start a <code>TaskRun</code> or integrate it with a <code>PipelineRun</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="_taskrun"><a class="anchor" href="#_taskrun"></a><code>TaskRun</code></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+data:
+  Dockerfile: |
+    ARG BASE_IMG=registry.access.redhat.com/ubi8/ubi
+    FROM $BASE_IMG AS buildah-runner
+    RUN dnf -y update &amp;&amp; \
+        dnf -y install git &amp;&amp; \
+        dnf clean all
+    CMD git
+kind: ConfigMap
+metadata:
+  name: dockerfile <i class="conum" data-value="1"></i><b>(1)</b>
+---
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: buildah-as-user-1000
+spec:
+  serviceAccountName: pipelines-sa-userid-1000
+  params:
+  - name: IMAGE
+    value: image-registry.openshift-image-registry.svc:5000/test/buildahuser
+  taskRef:
+    kind: Task
+    name: buildah-as-user
+  workspaces:
+  - configMap:
+      name: dockerfile <i class="conum" data-value="2"></i><b>(2)</b>
+    name: source</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>In this example, we only want to run a <code>TaskRun</code>, so we won&#8217;t have any prior task that fetches some sources with a <code>Dockerfile</code>, so we will use a <code>configmap</code> instead.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Thanks to the <code>workspace</code>, we can mount a <code>configmap</code> as the <em>source</em> workspace for our <code>buildah-as-user</code> <code>Task</code>.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pipelinerun"><a class="anchor" href="#_pipelinerun"></a><code>PipelineRun</code></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pipeline-buildah-as-user-1000
+spec:
+  params:
+  - name: IMAGE
+  - name: URL
+  workspaces:
+  - name: shared-workspace
+  - name: sslcertdir
+    optional: true
+  tasks:
+  - name: fetch-repository <i class="conum" data-value="1"></i><b>(1)</b>
+    taskRef:
+      name: git-clone
+      kind: ClusterTask
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+    params:
+    - name: url
+      value: $(params.URL)
+    - name: subdirectory
+      value: ""
+    - name: deleteExisting
+      value: "true"
+  - name: buildah
+    taskRef:
+      name: buildah-as-user <i class="conum" data-value="2"></i><b>(2)</b>
+    runAfter:
+    - fetch-repository
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    - name: sslcertdir
+      workspace: sslcertdir
+    params:
+    - name: IMAGE
+      value: $(params.IMAGE)
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: pipelinerun-buildah-as-user-1000
+spec:
+  serviceAccountName: pipelines-sa-userid-1000
+  params:
+  - name: URL
+    value: https://github.com/openshift/pipelines-vote-api
+  - name: IMAGE
+    value: image-registry.openshift-image-registry.svc:5000/test/buildahuser
+  taskRef:
+    kind: Pipeline
+    name: pipeline-buildah-as-user-1000
+  workspaces:
+  - name: shared-workspace <i class="conum" data-value="3"></i><b>(3)</b>
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>In this example, we will use the <code>git-clone</code> <code>ClusterTask</code> to fetch the source containing a <code>Dockerfile</code> and then use that new buildah task to build it.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>We are refering to our modified <code>buildah</code> <code>Task</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>We are using a PVC, automatically created by the controller, to share data between the <code>git-clone</code> Task and our modified <code>buildah</code> task</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_known_issues"><a class="anchor" href="#_known_issues"></a>Known issues</h3>
+<div class="paragraph">
+<p>This approach works relatively well with most <code>Dockerfile</code>. However, there is some cases where a build will fail:
+- Using the <code>--mount=type=cache</code> will likely fail due to permissions issues, see <a href="https://access.redhat.com/solutions/6969529">here</a>
+- Using the <code>--mount=type=secret</code> is bound to fail as well as it will try to mount something, and this requires additionnal capabilities that are not provided by our SCC (and that are closer to privileged capabilities).</p>
+</div>
+</div>
+</div>
+</div>
+</article>
+        </main>
+            </div>
+  </div>
+</div><footer class="footer">
+  <p>Adapted from Antora default UI, (c) 2019</p>
+</footer>
+<script src="../../../_/js/site.js"></script>
+<script src="../../../_/js/vendor/highlight.js"></script>
+<script src="../../../_/js/tabsBehavior.js"></script>
+<script>hljs.initHighlighting()</script>
+  </body>
+</html>

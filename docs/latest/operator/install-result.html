@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installing Result :: Red Hat OpenShift Pipelines previews</title>
+    <link rel="canonical" href="https://docs.openshift-pipelines.org/docs/latest/operator/install-result.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+<link rel="stylesheet" href="../../../_/css/extra.css">
+<link rel="stylesheet" href="../../../_/css/custom.css">
+<link rel="stylesheet" href="../../../_/css/tabs.css">
+<link rel="stylesheet" href="../../../_/font-awesome-4.7.0/css/font-awesome.min.css">
+<link rel="icon" href="../../../_/img/favicon.ico" type="image/x-icon">
+  </head>
+  <body class="article">
+<header class="header" role="banner">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <button class="navbar-burger" data-target="topbar-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <img src="../../../_/img/pipelines-icon.png" class="navbar-logo" alt="OpenShift Pipelines icon">
+        <a href="">OpenShift Pipelines - Unofficial documentation</a>
+      </div>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://docs.openshift-pipelines.org">Home</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="#">Upstream Projects</a>
+              <div class="navbar-dropdown">
+                  <a class="navbar-item" href="https://tekton.dev/docs">Tekton</a>
+              </div>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="main-wrapper">
+  <div class="navigation-container" data-component="docs" data-version="main">
+  <aside class="navigation">
+    <div class="panels">
+<div class="navigation-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Documentation</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Pipelines</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/auth.html">Authentication practices with Tekton</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/unprivileged-builds.html">Build container image with buildah, unprivileged</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/cache-in-tekton.html">Caches "support" in tekton pipelines</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Operator</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Results</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../results/query-using-opc.html">Query Results Using OPC CLI</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Chains</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../chains/hashicorp-integration-with-chains.html">Hashicorp Integration with Tekton Chains</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="navigation-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Documentation</span>
+    <span class="version">main</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">Documentation</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="../index.html">main</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+  <div class="main-view-and-toolbar">
+    <div class="toolbar" role="navigation">
+  <button class="navigation-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="crumbs" aria-label="breadcrumbs">
+  <ul>
+    <li class="crumb"><a href="../index.html">Documentation</a></li>
+    <li class="crumb"><a href="install-result.html">Installing Result</a></li>
+  </ul>
+</nav>
+</div>
+    <div class="main-view-and-toc">
+        <main class="main">
+          <article class="doc">
+<h1>Installing Result</h1>
+<div class="sect1">
+<h2 id="_installing_result"><a class="anchor" href="#_installing_result"></a>Installing Result</h2>
+<div class="sectionbody">
+<div class="literalblock">
+<div class="content">
+<pre>To install the results using Operator, please follow these instructions:</pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a database user and password in the <code>openshift-pipelines</code> namespace:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export NAMESPACE="openshift-pipelines"
+oc create secret generic tekton-results-postgres --namespace=${NAMESPACE} --from-literal=POSTGRES_USER=result --from-literal=POSTGRES_PASSWORD=$(openssl rand -base64 20)</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Generate a new self-signed certificate. Alternatively, you can use a certificate provided by the certificate authority (CA).</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">openssl req -x509 \
+-newkey rsa:4096 \
+-keyout key.pem \
+-out cert.pem \
+-days 365 \
+-nodes \
+-subj "/CN=tekton-results-api-service.${NAMESPACE}.svc.cluster.local" \
+-addext "subjectAltName = DNS:tekton-results-api-service.${NAMESPACE}.svc.cluster.local"</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create a new Transport Layer Security (TLS) secret from the certificate.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create secret tls -n ${NAMESPACE} tekton-results-tls --cert=cert.pem --key=key.pem</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Optional: Create a Persistent Volume Claim (PVC) if you need to store your logging data.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat &lt;&lt;EOF &gt; pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tekton-logs
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+EOF
+# Apply the above PVC
+oc apply -n ${NAMESPACE}  -f pvc.yaml</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Edit the <code>TektonResult</code> CR based on your needs</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: operator.tekton.dev/v1alpha1
+kind: TektonResult
+metadata:
+  name: result
+spec:
+  targetNamespace: openshift-pipelines
+  logs_api: true
+  log_level: debug
+  db_port: 5432
+  db_user: result
+  db_host: tekton-results-postgres-service.openshift-pipelines.svc.cluster.local
+  logging_pvc_name: tekton-logs
+  logs_path: /logs
+  logs_type: File
+  logs_buffer_size: 32768
+  auth_disable: true
+  tls_hostname_override: tekton-results-api-service.openshift-pipelines.svc.cluster.local
+  db_enable_auto_migration: true
+  server_port: 8080
+  prometheus_port: 9090</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Expose Route Tekton Results API Service</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create route -n ${NAMESPACE} passthrough tekton-results-api-service --service=tekton-results-api-service --port=8080</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</article>
+        </main>
+            </div>
+  </div>
+</div><footer class="footer">
+  <p>Adapted from Antora default UI, (c) 2019</p>
+</footer>
+<script src="../../../_/js/site.js"></script>
+<script src="../../../_/js/vendor/highlight.js"></script>
+<script src="../../../_/js/tabsBehavior.js"></script>
+<script>hljs.initHighlighting()</script>
+  </body>
+</html>

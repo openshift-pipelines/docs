@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Results Using OPC CLI :: Red Hat OpenShift Pipelines previews</title>
+    <link rel="canonical" href="https://docs.openshift-pipelines.org/docs/latest/results/query-using-opc.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+<link rel="stylesheet" href="../../../_/css/extra.css">
+<link rel="stylesheet" href="../../../_/css/custom.css">
+<link rel="stylesheet" href="../../../_/css/tabs.css">
+<link rel="stylesheet" href="../../../_/font-awesome-4.7.0/css/font-awesome.min.css">
+<link rel="icon" href="../../../_/img/favicon.ico" type="image/x-icon">
+  </head>
+  <body class="article">
+<header class="header" role="banner">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <button class="navbar-burger" data-target="topbar-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <img src="../../../_/img/pipelines-icon.png" class="navbar-logo" alt="OpenShift Pipelines icon">
+        <a href="">OpenShift Pipelines - Unofficial documentation</a>
+      </div>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://docs.openshift-pipelines.org">Home</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="#">Upstream Projects</a>
+              <div class="navbar-dropdown">
+                  <a class="navbar-item" href="https://tekton.dev/docs">Tekton</a>
+              </div>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="main-wrapper">
+  <div class="navigation-container" data-component="docs" data-version="main">
+  <aside class="navigation">
+    <div class="panels">
+<div class="navigation-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Documentation</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Pipelines</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/auth.html">Authentication practices with Tekton</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/unprivileged-builds.html">Build container image with buildah, unprivileged</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/cache-in-tekton.html">Caches "support" in tekton pipelines</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Operator</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../operator/troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Results</span>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="query-using-opc.html">Query Results Using OPC CLI</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Chains</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../chains/hashicorp-integration-with-chains.html">Hashicorp Integration with Tekton Chains</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="navigation-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Documentation</span>
+    <span class="version">main</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">Documentation</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="../index.html">main</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+  <div class="main-view-and-toolbar">
+    <div class="toolbar" role="navigation">
+  <button class="navigation-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="crumbs" aria-label="breadcrumbs">
+  <ul>
+    <li class="crumb"><a href="../index.html">Documentation</a></li>
+    <li class="crumb">Results</li>
+    <li class="crumb"><a href="query-using-opc.html">Query Results Using OPC CLI</a></li>
+  </ul>
+</nav>
+</div>
+    <div class="main-view-and-toc">
+        <main class="main">
+          <article class="doc">
+<h1>Query Results Using OPC CLI</h1>
+<div class="sect1">
+<h2 id="_query_results_using_opc_cli"><a class="anchor" href="#_query_results_using_opc_cli"></a>Query Results Using OPC CLI</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_setting_route"><a class="anchor" href="#_setting_route"></a>Setting Route</h3>
+<div class="paragraph">
+<p>These instructions assume we already created some Pipelineruns in our namespace. It&#8217;s also assumed that <code>auth_disable</code> is set to true in <code>TektonResult</code> CR..</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export NAMESPACE=results-testing</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>First, let&#8217;s get the route location:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">RESULTS_API=$(oc get route  tekton-results-api-service  -n openshift-pipelines  --no-headers -o custom-columns=":spec.host"):443</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If self-signed certificate was used during results installation, then pass <code>--insecure</code> flags to <code>opc results</code> commands.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_getting_results_list"><a class="anchor" href="#_getting_results_list"></a>Getting Results List</h3>
+<div class="paragraph">
+<p>Next, we can get the list of results stored which contains the Pipelinruns data with the below commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">opc results   list --insecure  --addr ${RESULTS_API} ${NAMESPACE}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We will receive output similar to below.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Name                                                          Start                                   Update
+results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed  2023-06-29 02:49:53 +0530 IST           2023-06-29 02:50:05 +0530 IST
+results-testing/results/ad7eb937-90cc-4510-8380-defe51ad793f  2023-06-29 02:49:38 +0530 IST           2023-06-29 02:50:06 +0530 IST
+results-testing/results/d064ce6e-d851-4b4e-8db4-7605a23671e4  2023-06-29 02:49:45 +0530 IST           2023-06-29 02:49:56 +0530 IST</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The format of the result&#8217;s <code>Name</code> field is {NAMESPACE}/results/{Pipelinerun UUID}.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_getting_records_list"><a class="anchor" href="#_getting_records_list"></a>Getting Records List</h3>
+<div class="paragraph">
+<p>Now, we can list records associated with results which will have logs, Taskruns, and Pipelineruns.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">opc results   records list --insecure  --addr ${RESULTS_API} results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed
+# Below is the sample output from above command:
+Name                                                                                                       Type                                    Start                                   Update
+results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/records/e9c736db-5665-441f-922f-7c1d65c9d621  tekton.dev/v1beta1.TaskRun              2023-06-29 02:49:53 +0530 IST           2023-06-29 02:49:57 +0530 IST
+results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/records/5de23a76-a12b-3a72-8a6a-4f15a3110a3e  results.tekton.dev/v1alpha2.Log         2023-06-29 02:49:57 +0530 IST           2023-06-29 02:49:57 +0530 IST
+results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/records/57ce92f9-9bf8-3a0a-aefb-dc20c3e2862d  results.tekton.dev/v1alpha2.Log         2023-06-29 02:50:05 +0530 IST           2023-06-29 02:50:05 +0530 IST
+results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/records/e9a0c21a-f826-42ab-a9d7-a03bcefed4fd  tekton.dev/v1beta1.TaskRun              2023-06-29 02:49:57 +0530 IST           2023-06-29 02:50:05 +0530 IST
+results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/records/04e2fbf2-8653-405f-bc42-a262bcf02bed  tekton.dev/v1beta1.PipelineRun          2023-06-29 02:49:53 +0530 IST           2023-06-29 02:50:05 +0530 IST
+results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/records/e6eea2f9-ec80-388c-9982-74a018a548e4  results.tekton.dev/v1alpha2.Log         2023-06-29 02:50:05 +0530 IST           2023-06-29 02:50:05 +0530 IST</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The format of the record&#8217;s <code>Name</code> field is {NAMESPACE}/results/{Run UUID}/records/{Run UUID}.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_fetching_runs_yaml"><a class="anchor" href="#_fetching_runs_yaml"></a>Fetching Runs YAML</h3>
+<div class="paragraph">
+<p>We can get Yaml for Pipelinerun using the below command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">opc results   records get --insecure  --addr ${RESULTS_API} results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/records/04e2fbf2-8653-405f-bc42-a262bcf02bed  | yq -r .data.value | base64 -d | yq -P '.'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_fetching_logs"><a class="anchor" href="#_fetching_logs"></a>Fetching Logs</h3>
+<div class="paragraph">
+<p>Similarly, we can get the logs of Pipelinerun by changing "records" to "logs" in the name of the record associated with PipelineRun:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">opc results   logs get --insecure  --addr ${RESULTS_API} results-testing/results/04e2fbf2-8653-405f-bc42-a262bcf02bed/logs/04e2fbf2-8653-405f-bc42-a262bcf02bed  | yq -r .data | base64 -d</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+        </main>
+            </div>
+  </div>
+</div><footer class="footer">
+  <p>Adapted from Antora default UI, (c) 2019</p>
+</footer>
+<script src="../../../_/js/site.js"></script>
+<script src="../../../_/js/vendor/highlight.js"></script>
+<script src="../../../_/js/tabsBehavior.js"></script>
+<script>hljs.initHighlighting()</script>
+  </body>
+</html>

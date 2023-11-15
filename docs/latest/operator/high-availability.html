@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Availability for Tekton Pipelines Controller :: Red Hat OpenShift Pipelines previews</title>
+    <link rel="canonical" href="https://docs.openshift-pipelines.org/docs/latest/operator/high-availability.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+<link rel="stylesheet" href="../../../_/css/extra.css">
+<link rel="stylesheet" href="../../../_/css/custom.css">
+<link rel="stylesheet" href="../../../_/css/tabs.css">
+<link rel="stylesheet" href="../../../_/font-awesome-4.7.0/css/font-awesome.min.css">
+<link rel="icon" href="../../../_/img/favicon.ico" type="image/x-icon">
+  </head>
+  <body class="article">
+<header class="header" role="banner">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <button class="navbar-burger" data-target="topbar-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <img src="../../../_/img/pipelines-icon.png" class="navbar-logo" alt="OpenShift Pipelines icon">
+        <a href="">OpenShift Pipelines - Unofficial documentation</a>
+      </div>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://docs.openshift-pipelines.org">Home</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="#">Upstream Projects</a>
+              <div class="navbar-dropdown">
+                  <a class="navbar-item" href="https://tekton.dev/docs">Tekton</a>
+              </div>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="main-wrapper">
+  <div class="navigation-container" data-component="docs" data-version="main">
+  <aside class="navigation">
+    <div class="panels">
+<div class="navigation-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Documentation</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Pipelines</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/auth.html">Authentication practices with Tekton</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/unprivileged-builds.html">Build container image with buildah, unprivileged</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/cache-in-tekton.html">Caches "support" in tekton pipelines</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Operator</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Results</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../results/query-using-opc.html">Query Results Using OPC CLI</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Chains</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../chains/hashicorp-integration-with-chains.html">Hashicorp Integration with Tekton Chains</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="navigation-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Documentation</span>
+    <span class="version">main</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">Documentation</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="../index.html">main</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+  <div class="main-view-and-toolbar">
+    <div class="toolbar" role="navigation">
+  <button class="navigation-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="crumbs" aria-label="breadcrumbs">
+  <ul>
+    <li class="crumb"><a href="../index.html">Documentation</a></li>
+    <li class="crumb"><a href="high-availability.html">High Availability for Tekton Pipelines Controller</a></li>
+  </ul>
+</nav>
+</div>
+    <div class="main-view-and-toc">
+        <main class="main">
+          <article class="doc">
+<h1>High Availability for Tekton Pipelines Controller</h1>
+<div class="sect1">
+<h2 id="_high_availability_for_tekton_pipelines_controller"><a class="anchor" href="#_high_availability_for_tekton_pipelines_controller"></a>High Availability for Tekton Pipelines Controller</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you want to run Tekton Pipelines to support high concurrent workload
+scenarios, you need to follow following steps to enable high
+availability for <code>tekton-pipelines-controller</code>. With this approach, you
+divide the workqueue in buckets, and each replica owns a subset of those
+buckets and process the load if that replica is the leader of that
+bucket.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 100%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>NOTE</strong>: High Availability support for <code>tekton-pipelines-controller</code> has
+been added in <code>OpenShift Pipelines</code> from <code>v1.10.0</code> onwards.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="sect2">
+<h3 id="_enable_high_availability_with_operator_on_openshift"><a class="anchor" href="#_enable_high_availability_with_operator_on_openshift"></a>Enable High Availability With Operator on OpenShift:</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>First, specify the number of buckets across which you want to
+distribute workqueue. The maximum supported value for bucket is <code>10</code>.
+You need to update the <code>config</code> CR with the required number of buckets.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc edit tektonconfig config</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: operator.tekton.dev/v1alpha1
+kind: TektonConfig
+metadata:
+    name: config
+spec:
+    &lt;&lt;---&gt;&gt;
+    pipeline:
+        &lt;&lt;---&gt;&gt;
+        performance:
+            disable-ha: false
+            buckets: &lt; buckets required &gt;
+        &lt;&lt;---&gt;&gt;</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="2">
+<li>
+<p><strong>This step is only required for <code>OpenShift Pipelines</code> releases <code>1.10.x</code>
+and <code>1.11.0</code>. This is not required for <code>v1.11.1</code> onwards.</strong></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Now grab the list of all the tektoninstallerset available</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc get tektoninstallerset | grep pipeline-main-deployment
+
+pipeline-main-deployment-45m2s                   True</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now edit the installerset which we got in previous command for removing
+one fields on tekton-pipelines-controller which is available in
+<code>spec.manifests</code> (This is required every time you do any change related
+to pipeline on tektonconfig)</p>
+</div>
+<div class="paragraph">
+<p>Remove the disable-ha flag in the args of container of
+tekton-pipelines-controller</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc edit tektoninstallerset pipeline-main-deployment-45m2s</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: operator.tekton.dev/v1alpha1
+kind: TektonInstallerSet
+metadata:
+    annotations:
+        operator.tekton.dev/target-namespace: openshift-pipelines
+spec:
+    manifests:
+    &lt;&lt;---&gt;&gt;
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+          name: tekton-pipelines-controller
+      spec:
+          template:
+              spec:
+                  containers:
+                  - args:
+                    &lt;&lt;---&gt;&gt;
+                    - -disable-ha
+                    - "false"            &lt;&lt;&lt;&lt; these two lines needs to be removed &gt;&gt;&gt;&gt;</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="3">
+<li>
+<p>Next step is to scale the <code>tekton-pipelines-controller</code> for having
+more replicas. (This is also recommended to not have more than 10
+replicas)</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc -n openshift-pipelines scale deployment/tekton-pipelines-controller --replicas=&lt;no of replicas requires&gt;</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="4">
+<li>
+<p>Now delete the existing leases so that old replica removes hold and
+new leases gets created which get acquired by different replicas.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc delete -n openshift-pipelines $(oc get leases -n openshift-pipelines -o name | grep tekton-pipelines-controller)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If by chance the leases are not properly divided over multiple
+pods, you can try recreating them.</p>
+</li>
+<li>
+<p>Configmap config-leader-election is
+by default getting used in knative controllers. So the change in data of
+this gets read by all other components too. It is fixed for
+pipelines-controller in
+<a href="https://issues.redhat.com/browse/SRVKP-3336">1.11.1</a> and for others in
+<a href="https://issues.redhat.com/browse/SRVKP-3377">1.12.0</a></p>
+</li>
+<li>
+<p>Need to modify
+tektoninstallerset (step 2) is a bug which is fixed in
+<a href="https://issues.redhat.com/browse/SRVKP-3335">1.11.1</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_disable_high_availability_with_operator_on_openshift"><a class="anchor" href="#_disable_high_availability_with_operator_on_openshift"></a>Disable High Availability With Operator on OpenShift:</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>First, scale down the <code>tekton-pipelines-controller</code> for replica <code>1</code></p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc -n openshift-pipelines scale deployment/tekton-pipelines-controller --replicas=1</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="2">
+<li>
+<p>Now remove the bucket field on the TektonConfig CR to remove the
+workqueue distribution</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc edit tektonconfig config</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: operator.tekton.dev/v1alpha1
+kind: TektonConfig
+metadata:
+    name: config
+spec:
+    &lt;&lt;---&gt;&gt;
+    pipeline:
+        &lt;&lt;---&gt;&gt;
+        performance:
+            disable-ha: false
+        &lt;&lt;---&gt;&gt;</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="3">
+<li>
+<p>Next is to delete the dangling leases which were acquired previously
+by the replicas</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc delete -n openshift-pipelines $(oc get leases -n openshift-pipelines -o name | grep tekton-pipelines-controller)</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="4">
+<li>
+<p>And to completely disable leader election and not creating leases for
+<code>tekton-pipelines-controller</code> pod, you can set <code>disable-ha</code> to <code>true</code> in
+TektonConfig CR (This is true in <code>OpenShift Pipelines</code> releases
+<code>v1.10.x</code> and <code>v1.11.0</code> because of
+<a href="https://issues.redhat.com/browse/SRVKP-3335">bug</a>)</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc edit tektonconfig config</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: operator.tekton.dev/v1alpha1
+kind: TektonConfig
+metadata:
+    name: config
+spec:
+    &lt;&lt;---&gt;&gt;
+    pipeline:
+        &lt;&lt;---&gt;&gt;
+        performance:
+            disable-ha: true
+        &lt;&lt;---&gt;&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+        </main>
+            </div>
+  </div>
+</div><footer class="footer">
+  <p>Adapted from Antora default UI, (c) 2019</p>
+</footer>
+<script src="../../../_/js/site.js"></script>
+<script src="../../../_/js/vendor/highlight.js"></script>
+<script src="../../../_/js/tabsBehavior.js"></script>
+<script>hljs.initHighlighting()</script>
+  </body>
+</html>

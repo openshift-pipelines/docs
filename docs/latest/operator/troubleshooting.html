@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troubleshooting :: Red Hat OpenShift Pipelines previews</title>
+    <link rel="canonical" href="https://docs.openshift-pipelines.org/docs/latest/operator/troubleshooting.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+<link rel="stylesheet" href="../../../_/css/extra.css">
+<link rel="stylesheet" href="../../../_/css/custom.css">
+<link rel="stylesheet" href="../../../_/css/tabs.css">
+<link rel="stylesheet" href="../../../_/font-awesome-4.7.0/css/font-awesome.min.css">
+<link rel="icon" href="../../../_/img/favicon.ico" type="image/x-icon">
+  </head>
+  <body class="article">
+<header class="header" role="banner">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <button class="navbar-burger" data-target="topbar-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <img src="../../../_/img/pipelines-icon.png" class="navbar-logo" alt="OpenShift Pipelines icon">
+        <a href="">OpenShift Pipelines - Unofficial documentation</a>
+      </div>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://docs.openshift-pipelines.org">Home</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="#">Upstream Projects</a>
+              <div class="navbar-dropdown">
+                  <a class="navbar-item" href="https://tekton.dev/docs">Tekton</a>
+              </div>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="main-wrapper">
+  <div class="navigation-container" data-component="docs" data-version="main">
+  <aside class="navigation">
+    <div class="panels">
+<div class="navigation-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Documentation</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Pipelines</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/auth.html">Authentication practices with Tekton</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/unprivileged-builds.html">Build container image with buildah, unprivileged</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/cache-in-tekton.html">Caches "support" in tekton pipelines</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Operator</span>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Results</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../results/query-using-opc.html">Query Results Using OPC CLI</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Chains</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../chains/hashicorp-integration-with-chains.html">Hashicorp Integration with Tekton Chains</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="navigation-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Documentation</span>
+    <span class="version">main</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">Documentation</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="../index.html">main</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+  <div class="main-view-and-toolbar">
+    <div class="toolbar" role="navigation">
+  <button class="navigation-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="crumbs" aria-label="breadcrumbs">
+  <ul>
+    <li class="crumb"><a href="../index.html">Documentation</a></li>
+    <li class="crumb">Operator</li>
+    <li class="crumb"><a href="troubleshooting.html">Troubleshooting</a></li>
+  </ul>
+</nav>
+</div>
+    <div class="main-view-and-toc">
+        <main class="main">
+          <article class="doc">
+<h1>Troubleshooting</h1>
+<div class="sect1">
+<h2 id="_mutation_failed_due_to_admission_controller"><a class="anchor" href="#_mutation_failed_due_to_admission_controller"></a>Mutation failed due to admission controller</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There might be cases, when trying to mutate (<code>kubectl apply</code>, <code>kubectl patch</code>) an object, it will be disallowed by admission controller. In most cases, this is expected, but it can sometimes lead to blocking circumstances.</p>
+</div>
+<div class="sect2">
+<h3 id="_faulty_eventlistener"><a class="anchor" href="#_faulty_eventlistener"></a>Faulty <code>EventListener</code></h3>
+<div class="paragraph">
+<p>The following example (extracted from <a href="https://issues.redhat.com/browse/SRVKP-2286">SRVKP-2286</a>) shows that an upgrade removed a field, but this field is validated when trying to mutate (and here delete) the object. Making the object not deletable.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">'Failed to update status for "qcontrol-services": admission webhook "webhook.triggers.tekton.dev" denied the request: mutation failed: cannot decode incoming old object: json: unknown field "podTemplate"'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To work-around this issue, the idea is to be able to temporarly disable the admission controller(s), remove the faulty object and then re-enable the admission controller(s). Because the admission controller(s) (as well as most payload that makes OpenShift Pipelines) are managed by the operator, trying to delete the admission controller(s) will result of it being re-created in a minute or two by the operator. What we&#8217;ll do is : <strong>temporarly disable the operator, remove the admission controller(s), and re-enable the operator</strong>. When re-enabled, the operator will re-create the admission controller.</p>
+</div>
+<div class="paragraph">
+<p>For the example above (aka faulty <code>EventListener</code>), the steps to follow <strong>in order</strong> are:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Disable the operator (scale to 0)</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc scale deploy -n openshift-operators openshift-pipelines-operator --replicas=0
+# […]
+# Validate that the deployment is scaled to 0
+$ oc get deploy openshift-pipelines-operator -n openshift-operators
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+openshift-pipelines-operator   0/0     0            0           80m</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Delete the triggers webhook (aka unregister it)</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc delete validatingwebhookconfigurations validation.webhook.triggers.tekton.dev
+# […]
+$ oc delete validatingwebhookconfigurations config.webhook.triggers.tekton.dev
+# […]
+$ oc delete mutatingwebhookconfigurations webhook.triggers.tekton.dev
+# […]
+$ oc get validatingwebhookconfigurations
+# should not contains any `*.webhook.triggers.tekton.dev` object
+$ oc get mutatingwebhookconfigurations
+# should not contains any `webhook.triggers.tekton.dev` object</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Delete the eventlistener</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc delete eventlistener faulty-el
+# […]</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Re-enable the operator (scale to 1)</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc scale deploy -n openshift-operators openshift-pipelines-operator --replicas=1
+# […]
+# Validate that the deployment is scaled to 1
+$ oc get deploy openshift-pipelines-operator -n openshift-operators
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+openshift-pipelines-operator   0/0     0            0           80m</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Wait a bit and see the triggers webhook re-registered</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc get validatingwebhookconfigurations
+# should contains two `*.webhook.triggers.tekton.dev` object
+NAME                                     WEBHOOKS   AGE
+# […]
+config.webhook.triggers.tekton.dev       1          5s
+# […]
+validation.webhook.triggers.tekton.dev   1          5s
+$ oc get mutatingwebhookconfigurations
+# should contains a `webhook.triggers.tekton.dev` object
+NAME                             WEBHOOKS   AGE
+# […]
+webhook.triggers.tekton.dev      1          45s</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create the eventlistener (if need be)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This can be adapted to other objects as well. The main element to know here is, which admission controller affect which object.</p>
+</div>
+</div>
+</div>
+</div>
+</article>
+        </main>
+            </div>
+  </div>
+</div><footer class="footer">
+  <p>Adapted from Antora default UI, (c) 2019</p>
+</footer>
+<script src="../../../_/js/site.js"></script>
+<script src="../../../_/js/vendor/highlight.js"></script>
+<script src="../../../_/js/tabsBehavior.js"></script>
+<script>hljs.initHighlighting()</script>
+  </body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untitled :: Red Hat OpenShift Pipelines previews</title>
+    <link rel="canonical" href="https://docs.openshift-pipelines.org/docs/latest/chains/hashicorp-integration-with-chains.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+<link rel="stylesheet" href="../../../_/css/extra.css">
+<link rel="stylesheet" href="../../../_/css/custom.css">
+<link rel="stylesheet" href="../../../_/css/tabs.css">
+<link rel="stylesheet" href="../../../_/font-awesome-4.7.0/css/font-awesome.min.css">
+<link rel="icon" href="../../../_/img/favicon.ico" type="image/x-icon">
+  </head>
+  <body class="article">
+<header class="header" role="banner">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <button class="navbar-burger" data-target="topbar-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <img src="../../../_/img/pipelines-icon.png" class="navbar-logo" alt="OpenShift Pipelines icon">
+        <a href="">OpenShift Pipelines - Unofficial documentation</a>
+      </div>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://docs.openshift-pipelines.org">Home</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="#">Upstream Projects</a>
+              <div class="navbar-dropdown">
+                  <a class="navbar-item" href="https://tekton.dev/docs">Tekton</a>
+              </div>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="main-wrapper">
+  <div class="navigation-container" data-component="docs" data-version="main">
+  <aside class="navigation">
+    <div class="panels">
+<div class="navigation-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Documentation</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Pipelines</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/auth.html">Authentication practices with Tekton</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/unprivileged-builds.html">Build container image with buildah, unprivileged</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline/cache-in-tekton.html">Caches "support" in tekton pipelines</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Operator</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../operator/troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Results</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../results/query-using-opc.html">Query Results Using OPC CLI</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Chains</span>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="hashicorp-integration-with-chains.html">Hashicorp Integration with Tekton Chains</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="navigation-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Documentation</span>
+    <span class="version">main</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">Documentation</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="../index.html">main</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+  <div class="main-view-and-toolbar">
+    <div class="toolbar" role="navigation">
+  <button class="navigation-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="crumbs" aria-label="breadcrumbs">
+  <ul>
+    <li class="crumb"><a href="../index.html">Documentation</a></li>
+    <li class="crumb">Chains</li>
+    <li class="crumb"><a href="hashicorp-integration-with-chains.html">Hashicorp Integration with Tekton Chains</a></li>
+  </ul>
+</nav>
+</div>
+    <div class="main-view-and-toc">
+        <main class="main">
+          <article class="doc">
+<div class="sect1">
+<h2 id="_hashicorp_integration_with_tekton_chains"><a class="anchor" href="#_hashicorp_integration_with_tekton_chains"></a>Hashicorp Integration with Tekton Chains</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_in_this_doc_we_will_be_running_chains_signed_provenance_tutorial_using_kms_solution_by_integrating_tekton_chains_with_hashicorp_vault"><a class="anchor" href="#_in_this_doc_we_will_be_running_chains_signed_provenance_tutorial_using_kms_solution_by_integrating_tekton_chains_with_hashicorp_vault"></a>In this doc, we will be running <a href="https://github.com/tektoncd/chains/blob/main/docs/tutorials/signed-provenance-tutorial.md">Chains Signed Provenance Tutorial</a> using <code>kms</code> solution by integrating Tekton Chains with Hashicorp Vault</h3>
+<div class="paragraph">
+<p><strong>NOTE</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Hashicorp vault should be installed</p>
+</li>
+<li>
+<p>This provider also requires that the <code>transit</code> secret engine is enabled</p>
+</li>
+<li>
+<p>If not done, you can login into the vault provider and run the following
+command</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">$ vault secrets enable transit
+  Success! Enabled the transit secrets engine at: transit/</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>You can get more info about <code>transit</code> secrets <a href="https://developer.hashicorp.com/vault/docs/secrets/transit#setup">here</a></p>
+</li>
+<li>
+<p>Make sure Tekton Pipelines and Tekton Chains is installed through the Openshift Pipelines Operator</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_chains_signed_provenance_tutorial_using_kms_solution_by_integrating_with_hashicorp_vault"><a class="anchor" href="#_chains_signed_provenance_tutorial_using_kms_solution_by_integrating_with_hashicorp_vault"></a><a href="https://github.com/tektoncd/chains/blob/main/docs/tutorials/signed-provenance-tutorial.md">Chains Signed Provenance Tutorial</a> using <code>kms</code> solution by integrating with Hashicorp Vault</h3>
+<div class="sect3">
+<h4 id="_step_1_generate_a_key_pair"><a class="anchor" href="#_step_1_generate_a_key_pair"></a>Step 1: Generate a Key Pair</h4>
+<div class="paragraph">
+<p>This provider requires that the standard Vault environment variables
+(<code>$VAULT_ADDR, $VAULT_TOKEN</code>) are set correctly.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">$ export VAULT_ADDR=&lt;VAULT_ADDR&gt;
+$ export VAULT_TOKEN=&lt;VAULT_TOKEN&gt;
+$ vault secrets enable transit  ---&gt; Ignore if you have already done</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now run the following command</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">$ cosign generate-key-pair --kms hashivault://$keyname</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>NOTE:-</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If you enabled transit secret engine at different path with the use of -path flag (i.e., $ vault secrets enable -path=<code>someotherpath</code> transit), you can use <code>TRANSIT_SECRET_ENGINE_PATH</code> environment variable to   specify this path while generating a key pair like the following:</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In that case the command will be</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">$ TRANSIT_SECRET_ENGINE_PATH="someotherpath" cosign generate-key-pair --kms hashivault://$keyname</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_step_2_set_up_authenticaion"><a class="anchor" href="#_step_2_set_up_authenticaion"></a>Step 2: Set up Authenticaion</h4>
+<div class="paragraph">
+<p>There are two forms of authentication that need to be set up:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The Chains controller will be pushing signatures to an OCI registry
+using the credentials linked to your TaskRun’s service account. See our
+authentication
+<a href="https://github.com/tektoncd/chains/blob/main/docs/authentication.md">doc</a></p>
+</li>
+<li>
+<p>The Kaniko Task that will build and push the image needs push
+permissions for your registry.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>To set up auth for the Kaniko Task, you’ll need a Kubernetes secret of a
+docker config.json file which contains the required auth. You can create
+the secret by running:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">kubectl create secret generic [DOCKERCONFIG_SECRET_NAME] --from-file [PATH TO CONFIG.JSON]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_step_3_configuring_tekton_chains"><a class="anchor" href="#_step_3_configuring_tekton_chains"></a>Step 3: Configuring Tekton Chains</h4>
+<div class="paragraph">
+<p>You’ll need to make these changes to the Tekton Chains Config:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>artifacts.taskrun.format: slsa/v1</p>
+</li>
+<li>
+<p>artifacts.taskrun.storage: oci</p>
+</li>
+<li>
+<p>artifacts.taskrun.signer: kms</p>
+</li>
+<li>
+<p>artifacts.pipelinerun.signer: kms</p>
+</li>
+<li>
+<p>artifacts.oci.signer: kms</p>
+</li>
+<li>
+<p>transparency.enabled: ``true''</p>
+</li>
+<li>
+<p>signers.kms.kmsref: hashivault://$keyname</p>
+</li>
+<li>
+<p>signers.kms.auth.address: &lt;VAULT_ADDR&gt;</p>
+</li>
+<li>
+<p>signers.kms.auth.token: &lt;VAULT_TOKEN&gt;</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You can add the above changes to the TektonConfig CR and correspondingly
+<code>chains-config</code> configMap will be updated by the operator</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_step_4_start_the_kaniko_task"><a class="anchor" href="#_step_4_start_the_kaniko_task"></a>Step 4: Start the Kaniko Task</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>First apply the</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f examples/kaniko/kaniko.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Substitute with the URI or file path to your Kaniko task.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Set the following enviornment variables:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">export REGISTRY=&lt;url_of_registry&gt;
+export DOCKERCONFIG_SECRET_NAME=&lt;name_of_the_secret_in_docker_config_json&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Substitute with the URL of the registry where you want to push the
+image. Substitute with the name of the secret in the docker config.json
+file.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Start the Kaniko Task</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">tkn task start --param IMAGE=$REGISTRY/kaniko-chains --use-param-defaults --workspace name=source,emptyDir="" --workspace name=dockerconfig,secret=$DOCKERCONFIG_SECRET_NAME kaniko-chains</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Wait for a minute to allow Tekton Chains to generate the provenance
+and sign it, and then check the availability of the
+chains.tekton.dev/signed=true annotation on the task run.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">oc get tr &lt;task_run_name&gt; -o json | jq -r .metadata.annotations
+{
+    "chains.tekton.dev/signed": "true",
+    ...
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_step_5_verify_the_image_and_the_attestation"><a class="anchor" href="#_step_5_verify_the_image_and_the_attestation"></a>Step 5: Verify the image and the attestation</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">cosign verify --key cosign.pub $REGISTRY/kaniko-chains
+cosign verify-attestation --key cosign.pub --type slsaprovenance $REGISTRY/kaniko-chains</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or you can use the hashivault://$keyname as key as well</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">cosign verify --key hashivault://$keyname $REGISTRY/kaniko-chains
+cosign verify-attestation --key hashivault://$keyname --type slsaprovenance $REGISTRY/kaniko-chains</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output would be like this</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">Verification for index.docker.io/puneet2147/kaniko-chains:latest --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - The claims were present in the transparency log
+  - The signatures were integrated into the transparency log when the certificate was valid
+  - The signatures were verified against the specified public key
+
+[{"critical":{"identity":{"docker-reference":"index.docker.io/puneet2147/kaniko-chains"},"image":{"docker-manifest-digest":"sha256:e14396b283abcbacddba403a923a7fdecf2c54537a1d6a1ee1076767bec742d1"},"type":"cosign container image signature"},"optional":null}]
+
+Verification for docker.io/puneet2147/kaniko-chains --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - The claims were present in the transparency log
+  - The signatures were integrated into the transparency log when the certificate was valid
+  - The signatures were verified against the specified public key
+{"payloadType":"application/vnd.in-toto+json","payload":"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInByZWRpY2F0ZVR5cGUiOiJodHRwczovL3Nsc2EuZGV2L3Byb3ZlbmFuY2UvdjAuMiIsInN1YmplY3QiOlt7Im5hbWUiOiJpbmRleC5kb2NrZXIuaW8vcHVuZWV0MjE0Ny9rYW5pa28tY2hhaW5zIiwiZGlnZXN0Ijp7InNoYTI1NiI6ImUxNDM5NmIyODNhYmNiYWNkZGJhNDAzYTkyM2E3ZmRlY2YyYzU0NTM3YTFkNmExZWUxMDc2NzY3YmVjNzQyZDEifX1dLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Imh0dHBzOi8vdGVrdG9uLmRldi9jaGFpbnMvdjIifSwiYnVpbGRUeXBlIjoidGVrdG9uLmRldi92MWJldGExL1Rhc2tSdW4iLCJpbnZvY2F0aW9uIjp7ImNvbmZpZ1NvdXJjZSI6e30sInBhcmFtZXRlcnMiOnsiQlVJTERFUl9JTUFHRSI6Imdjci5pby9rYW5pa28tcHJvamVjdC9leGVjdXRvcjp2MS41LjFAc2hhMjU2OmM2MTY2NzE3ZjdmZTBiN2RhNDQ5MDhjOTg2MTM3ZWNmZWFiMjFmMzFlYzM5OTJmNmUxMjhmZmY4YTk0YmU4YTUiLCJDT05URVhUIjoiLi8iLCJET0NLRVJGSUxFIjoiLi9Eb2NrZXJmaWxlIiwiRVhUUkFfQVJHUyI6IiIsIklNQUdFIjoiZG9ja2VyLmlvL3B1bmVldDIxNDcva2FuaWtvLWNoYWlucyJ9LCJlbnZpcm9ubWVudCI6eyJhbm5vdGF0aW9ucyI6eyJwaXBlbGluZS50ZWt0b24uZGV2L3JlbGVhc2UiOiJjODAyMDY5In0sImxhYmVscyI6eyJhcHAua3ViZXJuZXRlcy5pby9tYW5hZ2VkLWJ5IjoidGVrdG9uLXBpcGVsaW5lcyIsInRla3Rvbi5kZXYvdGFzayI6Imthbmlrby1jaGFpbnMifX19LCJidWlsZENvbmZpZyI6eyJzdGVwcyI6W3siZW50cnlQb2ludCI6InNldCAtZVxuZWNobyBcIkZST00gYWxwaW5lQHNoYTI1Njo2OWU3MGE3OWYyZDQxYWI1ZDYzN2RlOThjMWUwYjA1NTIwNmJhNDBhODE0NWU3YmRkYjU1Y2NjMDRlMTNjZjhmXCIgfCB0ZWUgLi9Eb2NrZXJmaWxlXG4iLCJhcmd1bWVudHMiOm51bGwsImVudmlyb25tZW50Ijp7ImNvbnRhaW5lciI6ImFkZC1kb2NrZXJmaWxlIiwiaW1hZ2UiOiJkb2NrZXIuaW8vbGlicmFyeS9iYXNoQHNoYTI1NjoxZWEzMGQ5YjY1Nzk3ZmJhZTQ3ODdmNjE4ODc5NmU3MTg5MzcxMDE5MDMxOTU4YTE2NzQyM2QzNDdkMzJlYWRhIn0sImFubm90YXRpb25zIjpudWxsfSx7ImVudHJ5UG9pbnQiOiIiLCJhcmd1bWVudHMiOlsiIiwiLS1kb2NrZXJmaWxlPS4vRG9ja2VyZmlsZSIsIi0tY29udGV4dD0vd29ya3NwYWNlL3NvdXJjZS8uLyIsIi0tZGVzdGluYXRpb249ZG9ja2VyLmlvL3B1bmVldDIxNDcva2FuaWtvLWNoYWlucyIsIi0tZGlnZXN0LWZpbGU9L3Rla3Rvbi9yZXN1bHRzL0lNQUdFX0RJR0VTVCJdLCJlbnZpcm9ubWVudCI6eyJjb250YWluZXIiOiJidWlsZC1hbmQtcHVzaCIsImltYWdlIjoiZ2NyLmlvL2thbmlrby1wcm9qZWN0L2V4ZWN1dG9yQHNoYTI1NjpjNjE2NjcxN2Y3ZmUwYjdkYTQ0OTA4Yzk4NjEzN2VjZmVhYjIxZjMxZWMzOTkyZjZlMTI4ZmZmOGE5NGJlOGE1In0sImFubm90YXRpb25zIjpudWxsfSx7ImVudHJ5UG9pbnQiOiJzZXQgLWVcbmVjaG8gZG9ja2VyLmlvL3B1bmVldDIxNDcva2FuaWtvLWNoYWlucyB8IHRlZSAvdGVrdG9uL3Jlc3VsdHMvSU1BR0VfVVJMXG4iLCJhcmd1bWVudHMiOm51bGwsImVudmlyb25tZW50Ijp7ImNvbnRhaW5lciI6IndyaXRlLXVybCIsImltYWdlIjoiZG9ja2VyLmlvL2xpYnJhcnkvYmFzaEBzaGEyNTY6MWVhMzBkOWI2NTc5N2ZiYWU0Nzg3ZjYxODg3OTZlNzE4OTM3MTAxOTAzMTk1OGExNjc0MjNkMzQ3ZDMyZWFkYSJ9LCJhbm5vdGF0aW9ucyI6bnVsbH1dfSwibWV0YWRhdGEiOnsiYnVpbGRTdGFydGVkT24iOiIyMDIzLTA3LTE4VDA4OjM4OjU0WiIsImJ1aWxkRmluaXNoZWRPbiI6IjIwMjMtMDctMThUMDg6Mzk6MTNaIiwiY29tcGxldGVuZXNzIjp7InBhcmFtZXRlcnMiOmZhbHNlLCJlbnZpcm9ubWVudCI6ZmFsc2UsIm1hdGVyaWFscyI6ZmFsc2V9LCJyZXByb2R1Y2libGUiOmZhbHNlfSwibWF0ZXJpYWxzIjpbeyJ1cmkiOiJkb2NrZXIuaW8vbGlicmFyeS9iYXNoIiwiZGlnZXN0Ijp7InNoYTI1NiI6IjFlYTMwZDliNjU3OTdmYmFlNDc4N2Y2MTg4Nzk2ZTcxODkzNzEwMTkwMzE5NThhMTY3NDIzZDM0N2QzMmVhZGEifX0seyJ1cmkiOiJnY3IuaW8va2FuaWtvLXByb2plY3QvZXhlY3V0b3IiLCJkaWdlc3QiOnsic2hhMjU2IjoiYzYxNjY3MTdmN2ZlMGI3ZGE0NDkwOGM5ODYxMzdlY2ZlYWIyMWYzMWVjMzk5MmY2ZTEyOGZmZjhhOTRiZThhNSJ9fV19fQ==","signatures":[{"keyid":"SHA256:wvNLyVMa1zxAWD9ZjvKanoCuukphRbKYdLM24TEEAj0","sig":"MEYCIQDsMLBOWKZKDBiiVJOz4ZQbPTKfQwhdBgsbVupJlvlN+gIhAPxMbCfjKGSl1ity9RS9/UMXRcI5QtkCH+LX6t4V5/Ft"}]}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+        </main>
+            </div>
+  </div>
+</div><footer class="footer">
+  <p>Adapted from Antora default UI, (c) 2019</p>
+</footer>
+<script src="../../../_/js/site.js"></script>
+<script src="../../../_/js/vendor/highlight.js"></script>
+<script src="../../../_/js/tabsBehavior.js"></script>
+<script>hljs.initHighlighting()</script>
+  </body>
+</html>

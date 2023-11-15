@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caches "support" in tekton pipelines :: Red Hat OpenShift Pipelines previews</title>
+    <link rel="canonical" href="https://docs.openshift-pipelines.org/docs/latest/pipeline/cache-in-tekton.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+<link rel="stylesheet" href="../../../_/css/extra.css">
+<link rel="stylesheet" href="../../../_/css/custom.css">
+<link rel="stylesheet" href="../../../_/css/tabs.css">
+<link rel="stylesheet" href="../../../_/font-awesome-4.7.0/css/font-awesome.min.css">
+<link rel="icon" href="../../../_/img/favicon.ico" type="image/x-icon">
+  </head>
+  <body class="article">
+<header class="header" role="banner">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <button class="navbar-burger" data-target="topbar-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <img src="../../../_/img/pipelines-icon.png" class="navbar-logo" alt="OpenShift Pipelines icon">
+        <a href="">OpenShift Pipelines - Unofficial documentation</a>
+      </div>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://docs.openshift-pipelines.org">Home</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="#">Upstream Projects</a>
+              <div class="navbar-dropdown">
+                  <a class="navbar-item" href="https://tekton.dev/docs">Tekton</a>
+              </div>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="main-wrapper">
+  <div class="navigation-container" data-component="docs" data-version="main">
+  <aside class="navigation">
+    <div class="panels">
+<div class="navigation-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Documentation</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Pipelines</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="auth.html">Authentication practices with Tekton</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="unprivileged-builds.html">Build container image with buildah, unprivileged</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="cache-in-tekton.html">Caches "support" in tekton pipelines</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Operator</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../operator/troubleshooting.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Results</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../results/query-using-opc.html">Query Results Using OPC CLI</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-toggle"></button>
+    <span class="nav-text">Chains</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../chains/hashicorp-integration-with-chains.html">Hashicorp Integration with Tekton Chains</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="navigation-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Documentation</span>
+    <span class="version">main</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">Documentation</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="../index.html">main</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+  <div class="main-view-and-toolbar">
+    <div class="toolbar" role="navigation">
+  <button class="navigation-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="crumbs" aria-label="breadcrumbs">
+  <ul>
+    <li class="crumb"><a href="../index.html">Documentation</a></li>
+    <li class="crumb">Pipelines</li>
+    <li class="crumb"><a href="cache-in-tekton.html">Caches "support" in tekton pipelines</a></li>
+  </ul>
+</nav>
+</div>
+    <div class="main-view-and-toc">
+        <main class="main">
+          <article class="doc">
+<h1>Caches "support" in tekton pipelines</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+This article is an exploratory one. It might contains example and command that might not work for the reader.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph lead">
+<p>The idea of this article is to explore the different ways to "handle"
+cache when using
+<a href="https://github.com/tektoncd/pipeline"><code>tektoncd/pipeline</code></a> or
+openshift-pipelines. This should evolve as time passes as it will
+explore what is possible today and what could be done built-in. If
+someday <a href="https://github.com/tektoncd/pipeline"><code>tektoncd/pipeline</code></a>
+or any tektoncd component provides this features, this article would
+be either adapted or <em>marked as deprecated</em>.</p>
+</div>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"></div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">Introduction</a></li>
+<li><a href="#_what_caching_looks_like_in_tekton">What <em>caching</em> looks like in Tekton</a></li>
+<li><a href="#_authoring_cache_friendly_tasks_example_with_go">Authoring cache friendly tasks (example with <code>go</code>)</a>
+<ul class="sectlevel2">
+<li><a href="#_the_task_definition">The <code>Task</code> definition</a>
+<ul class="sectlevel3">
+<li><a href="#_providing_the_cache">Providing the cache</a></li>
+</ul>
+</li>
+<li><a href="#_shortcomings">Shortcomings</a></li>
+<li><a href="#_full_cache_support_in_a_task">Full cache support in a Task</a>
+<ul class="sectlevel3">
+<li><a href="#_using_oci_image">Using <code>oci</code> image</a></li>
+<li><a href="#_using_rsync">Using <code>rsync</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_remote_resolution_explorations">Remote resolution explorations</a>
+<ul class="sectlevel2">
+<li><a href="#_tekton_wrap_pipeline"><code>tekton-wrap-pipeline</code></a></li>
+<li><a href="#_tekton_cache_pipeline"><code>tekton-cache-pipeline</code></a></li>
+</ul>
+</li>
+<li><a href="#_customtask_explorations"><code>CustomTask</code> explorations</a></li>
+<li><a href="#_though_on_a_built_in_api">Though on a built-in API</a></li>
+</ul>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cache and <em>caching</em> are very abstract, wide concept. In the context of a CI pipeline, it
+can take several forms depending on what the pipeline and tasks are doing. If we are
+building an image, the cache is most likely related to the "base image" and layers re-used
+accross multiple builds. If we are building a go project, it could be around <em>fetching</em>
+the dependencies (if no <code>vendor</code> folder) or around build cache (the go compiler cache, to
+speed the next compilation).</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+We will focus on filesystem based caching in the next part of the article. Things like a cluster-wide registry for oci image, a maven proxy or a go modules proxy for geting dependency quicker is out of the scope of this article as it doesn&#8217;t have anything to do with Tekton itself.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>As of today (end of 2022), there is nothing specific related to <em>caches</em> in the <a href="https://github.com/tektoncd/pipeline"><code>tektoncd/pipeline</code></a> API. This means it is up to the <code>Task</code> authors, users or <code>tektoncd</code> component integrators to manage cache how they fit. Let&#8217;s explore different ways this can be handled.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_caching_looks_like_in_tekton"><a class="anchor" href="#_what_caching_looks_like_in_tekton"></a>What <em>caching</em> looks like in Tekton</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Even though there is a lot of different ways to define <em>caching</em>, in term of how it "looks" in Tekton, is relatively straightforward. Filesystem-based caching in Tekton maps really well with <a href="https://tekton.dev/docs/pipelines/workspaces/"><code>workspaces</code></a>. Most if not all of the rest of this article will use <a href="https://tekton.dev/docs/pipelines/workspaces/"><code>workspaces</code></a> as the <em>feature</em> we use to handle caching.</p>
+</div>
+<div class="paragraph">
+<p>There is two parts of this for Tekton:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>How <code>Task</code> are written to easily use/interact with caches. For example, a <code>go</code> build <code>Task</code> should be able to use a <code>GOCACHE</code> if provided, but doesn&#8217;t need to know anything about <strong>how</strong> it is provided. This is the <em>easiest</em> part and the least opiniated one as well.</p>
+</li>
+<li>
+<p>How to provide the cache <strong>content</strong> to the the <code>TaskRun</code>. This is the <em>tricky</em> part, and there is a lot of different / possible ways to do that.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_authoring_cache_friendly_tasks_example_with_go"><a class="anchor" href="#_authoring_cache_friendly_tasks_example_with_go"></a>Authoring cache friendly tasks (example with <code>go</code>)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is the <strong>easy</strong> part of supporting caches in Tekton, and this is also the most important one for <code>Task</code> author. This part is about how to write tasks that can easily be <em>hook-up</em>, somehow, with some caching mechanism. We&#8217;ll go through example of different "language" to draw a decent picture.</p>
+</div>
+<div class="paragraph">
+<p>As an author of a <code>Task</code>, especially if we aim to make this <code>Task</code> as shareable as possible, this is the only thing we should care about. Someone else (a.k.a the user using this <code>Task</code> or a tool) will have to provide you with the cache.</p>
+</div>
+<div class="sect2">
+<h3 id="_the_task_definition"><a class="anchor" href="#_the_task_definition"></a>The <code>Task</code> definition</h3>
+<div class="paragraph">
+<p>Go uses <code>GOCACHE</code> to know and store any <em>build</em> related cache (compilation) and <code>GOMODCACHE</code> for <code>go.mod</code> dependencies. To write a <code>Task</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: golang-build
+spec:
+  description: &gt;-
+    This Task is Golang task to build Go projects.
+  params:
+  - name: package
+    description: base package to build in
+  - name: packages
+    description: "packages to build (default: ./cmd/...)"
+    default: "./cmd/..."
+  # Additionnal parameters
+  # […]
+  workspaces:
+  - name: source
+  - name: cache-go <i class="conum" data-value="1"></i><b>(1)</b>
+    optional: true
+  - name: cache-gomod <i class="conum" data-value="2"></i><b>(2)</b>
+    optional: true
+  steps:
+  - name: build
+    image: docker.io/library/golang:1.18
+    workingDir: $(workspaces.source.path)
+    script: |
+      [[ "$(workspaces.cache-go.bound)" == "true" ]] &amp;&amp; { <i class="conum" data-value="3"></i><b>(3)</b>
+        export GOCACHE=$(workspaces.cache-go.path)
+      }
+      [[ "$(workspaces.cache-gomod.bound)" == "true" ]] &amp;&amp; { <i class="conum" data-value="4"></i><b>(4)</b>
+        export GOMODCACHE=$(workspaces.cache-gomod.path)
+      }
+      go build $(params.flags) $(params.packages)
+    env:
+    - name: GOOS
+      value: #[…]</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This defines an optional workspace for setting up the <code>GOCACHE</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This defines an optional workspace for setting up the <code>GOMODCACHE</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>If something is <em>bound</em> to the <code>cache-go</code>, export <code>GOCACHE</code> to point to the workspace.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>If something is <em>bound</em> to the <code>cache-gomod</code>, export <code>GOCACHE</code> to point to the workspace.</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_providing_the_cache"><a class="anchor" href="#_providing_the_cache"></a>Providing the cache</h4>
+<div class="paragraph">
+<p>Now, the idea is to provide the cache at <em>runtime</em>, using a PVC for example. Let&#8217;s give an example with a <code>Pipeline</code> and a <code>PipelineRun</code>.</p>
+</div>
+<div class="paragraph">
+<p>First, we need a <code>PVC</code> for gomod cache, and one for go. Let&#8217;s create a 2Gi PVC.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: go-cache
+spec:
+  resources:
+    requests:
+      storage: 4Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gomod-cache
+spec:
+  resources:
+    requests:
+      storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>Pipeline</code> will fetch some sources using the <a href="https://github.com/tektoncd/catalog/tree/main/task/git-clone/0.9"><code>git-clone</code></a> <code>Task</code> and our go <code>Task</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-go-with-optional-cache
+spec:
+  workspaces:
+  - name: shared-workspace
+  - name: go-cache <i class="conum" data-value="1"></i><b>(1)</b>
+    optional: true
+  - name: gomod-cache <i class="conum" data-value="2"></i><b>(2)</b>
+    optional: true
+  params:
+  - name: git-url
+    default: https://github.com/tektoncd/pipeline
+  tasks:
+  - name: fetch-repository
+    taskRef:
+    name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+    params:
+    - name: url
+      value: $(params.git-url)
+    - name: subdirectory
+      value: ""
+    - name: deleteExisting
+      value: "true"
+  - name: build
+    taskRef:
+      name: golang-build
+    runAfter:
+    - fetch-repository
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    - name: cache-go <i class="conum" data-value="3"></i><b>(3)</b>
+      workspace: cache-go
+    - name: cache-gomod <i class="conum" data-value="4"></i><b>(4)</b>
+      workspace: cache-gomod</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>As for the <code>Task</code>, we define a workspace for <code>GOCACHE</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>As for the <code>Task</code>, we define a workspace for <code>GOMODCACHE</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>We are bind the <code>Pipeline&#8217;s defined `cache-go</code> workspace to the <code>cache-go</code> workspace defined in the <code>Task</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>We are bind the <code>Pipeline&#8217;s defined `cache-gomod</code> workspace to the <code>cache-gomod</code> workspace defined in the <code>Task</code>.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now the <code>PipelineRun</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: build-go-with-cache-run
+spec:
+  pipelineRef:
+    name: build-go-with-optional-cache
+  params:
+  - name: git-url
+    value: https://github.com/tektoncd/pipeline
+  workspaces:
+  - name: shared-workspace
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 100Mi
+  - name: go-cache
+    persistentVolumeClaim: <i class="conum" data-value="1"></i><b>(1)</b>
+      claimName: go-cache
+  - name: gomod-cache
+    persistentVolumeClaim: <i class="conum" data-value="2"></i><b>(2)</b>
+      claimName: gomod-cache</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>We bind our <code>go-cache</code> PVC to the <code>go-cache</code> workspace.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>We bind our <code>gomod-cache</code> PVC to the <code>gomod-cache</code> workspace.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_shortcomings"><a class="anchor" href="#_shortcomings"></a>Shortcomings</h3>
+<div class="paragraph">
+<p>There is a few possible <em>shortcomings</em> with this approach:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Depending on the <em>class</em> of the persistent storage, it might be tricky to get those PVC provisionned. In addition, the cluster might have some quotas on the number of PVC used, and these being "always" there would take some <em>place</em> in this quota.</p>
+</li>
+<li>
+<p>Similar to the previous point, depending on the access mode (<code>ReadWriteMany</code>, <code>ReadWriteOnce</code>, …), it may force the pipeline to all run on the same node, or make the cache read-only (which would be.. way less useful).</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_full_cache_support_in_a_task"><a class="anchor" href="#_full_cache_support_in_a_task"></a>Full cache support in a Task</h3>
+<div class="paragraph">
+<p>Following what we just did, we could <strong>enhance</strong> our <code>Task</code> definition to be able to caching itself. At authoring time, we can have steps that pull and push some folder/workspace.</p>
+</div>
+<div class="paragraph">
+<p>There would be 2 steps to add : <code>cache-fetch</code> and <code>cache-upload</code>. For each <em>implementation</em>, the content/tool/workflow of those steps would differ.</p>
+</div>
+<div class="sect3">
+<h4 id="_using_oci_image"><a class="anchor" href="#_using_oci_image"></a>Using <code>oci</code> image</h4>
+<div class="ulist">
+<ul>
+<li>
+<p><code>cache-fetch</code>, which would consist of</p>
+<div class="ulist">
+<ul>
+<li>
+<p>compute a unique hash from something to identify the cache. For example, for <code>go</code> we would use <code>go.sum</code> file</p>
+</li>
+<li>
+<p>try to fetch an image tagged with that hash</p>
+<div class="ulist">
+<ul>
+<li>
+<p>if it doesn&#8217;t exit, we just warn and pass on</p>
+</li>
+<li>
+<p>if it succeeds, we extract it to the <code>go-cache</code> workspace/folder</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>cache-upload</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p>compute a unique hash from something to identify the cache. For example, for <code>go</code> we would use <code>go.sum</code> file</p>
+</li>
+<li>
+<p>push the image tagged with that hash</p>
+</li>
+<li>
+<p><em>possible optimization</em>: compare the cache content / image tarball, with the one we fetch, if it&#8217;s similar, we don&#8217;t even need to push</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_using_rsync"><a class="anchor" href="#_using_rsync"></a>Using <code>rsync</code></h4>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This need to be completed
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_remote_resolution_explorations"><a class="anchor" href="#_remote_resolution_explorations"></a>Remote resolution explorations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The general idea behind this <em>exploration</em> is very similar to <a href="https://github.com/openshift-pipelines/tekton-wrap-pipeline"><code>tekton-wrap-pipeline</code></a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Tekton resolver that allows to run a `Pipeline` with `emptydir`
+workspaces that will be using different mean to transfer data from a
+one `Task` to the other.
+
+This is a experimentation around not using PVC for sharing data with
+workspace in a Pipeline.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The idea, adapted to <em>caching</em>, would be to enhance <code>Task</code> with steps to pull and push the cache(s) in the correct workspaces, bound to <code>emptydir</code>.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This need to be completed
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_tekton_wrap_pipeline"><a class="anchor" href="#_tekton_wrap_pipeline"></a><code>tekton-wrap-pipeline</code></h3>
+<div class="paragraph">
+<p>We can use <a href="https://github.com/openshift-pipelines/tekton-wrap-pipeline"><code>tekton-wrap-pipeline</code></a> directly. If we take the previous example, we can re-write the <code>PipelineRun</code> above like the following.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: simple-pipelinerun
+spec:
+  serviceAccountName: mysa
+  pipelineRef:
+    resolver: wrap <i class="conum" data-value="1"></i><b>(1)</b>
+    params:
+    - name: pipelineref
+      value: build-go-with-optional-cache
+    - name: workspaces
+      value: go-cache,gomod-cache <i class="conum" data-value="2"></i><b>(2)</b>
+    - name: target
+      value: quay.io/vdemeest/pipelinerun-$(context.pipelineRun.namespace)-{{workspace}}:latest <i class="conum" data-value="3"></i><b>(3)</b>
+    - name: base
+      value: quay.io/vdemeest/pipelinerun-$(context.pipelineRun.namespace)-{{workspace}}:latest <i class="conum" data-value="4"></i><b>(4)</b>
+  params:
+  - name: git-url
+    value: https://github.com/tektoncd/pipeline
+  workspaces:
+  - name: shared-workspace
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 100Mi
+  - name: go-cache <i class="conum" data-value="5"></i><b>(5)</b>
+    emptyDir: {}
+  - name: gomod-cache <i class="conum" data-value="6"></i><b>(6)</b>
+    emptyDir: {}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>We are using the remote resolution with the resolver named <code>wrap</code> (provided by <a href="https://github.com/openshift-pipelines/tekton-wrap-pipeline"><code>tekton-wrap-pipeline</code></a>)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>These are the 2 workspaces we want to handle with the "wrapper". In a gist, this means : for those 2 workspaces, using an oci image (a different one) for saving and pushing to it</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>This is the <em>naming template</em> for the target image to use, one "image" per namespace and go-cache/gomod-cache.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>This is the <em>naming template</em> for the base image to use, using the same to ensure we "keep" the content from one run to the other.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>We "bind" the go-cache workspace with emptydir just to "pass validation"</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Same with gomod-cache, we "bind" the go-cache workspace with emptydir just to "pass validation"</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This approach has few shortcomings as of today:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Using <code>base</code> image means we need to "create" the repository prior to being to run (otherwise, it will fail to get the content of the cache because it doesn&#8217;t exists)</p>
+</li>
+<li>
+<p>As it is proposed, it will share the <code>go-cache</code> and <code>gomod-cache</code> for all runs using this, on the same namespace. Fiddling with <code>target</code> and <code>base</code> allow you to decide what to use, but still it doesn&#8217;t take into account the <code>go.sum</code>, …</p>
+</li>
+<li>
+<p>As of today, it only works with OCI images</p>
+</li>
+<li>
+<p>As of today, it needs extra auth to be able to push/pull the cache to an oci image registry</p>
+</li>
+<li>
+<p><code>tekton-wrap-pipeline</code> append layers, which means at some point, the image will be too big and have too many layers. In our case, we don&#8217;t necessarily care about the layers but only the final content.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tekton_cache_pipeline"><a class="anchor" href="#_tekton_cache_pipeline"></a><code>tekton-cache-pipeline</code></h3>
+<div class="paragraph">
+<p>We can build on top of this <code>tekton-wrap-pipeline</code> to provide an "easier" way to setup cache. The idea, is to be able to write the following <code>PipelineRun</code>.</p>
+</div>
+<div class="paragraph">
+<p>As said above, <code>tekton-wrap-pipeline</code> append layers, which means at some point, the image will be too big and have too many layers. In our case, we don&#8217;t necessarily care about the layers but only the final content. What we want here, is a way to get some content from a given hash.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: simple-pipelinerun
+spec:
+  serviceAccountName: mysa
+  pipelineRef:
+    resolver: cache <i class="conum" data-value="1"></i><b>(1)</b>
+    params:
+    - name: pipelineref
+      value: build-go-with-optional-cache
+    - name: workspaces
+      value: go-cache,gomod-cache <i class="conum" data-value="2"></i><b>(2)</b>
+    - name: files <i class="conum" data-value="3"></i><b>(3)</b>
+      value: **/go.sum
+    - name: target <i class="conum" data-value="4"></i><b>(4)</b>
+      value: quay.io/vdemeest/cache/{{workspace}}:{{hash}}
+  params:
+  - name: git-url
+    value: https://github.com/tektoncd/pipeline
+  workspaces:
+  - name: shared-workspace
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 100Mi
+  - name: go-cache
+    emptyDir: {}
+  - name: gomod-cache
+    emptyDir: {}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>We are using our <code>tekton-cache-pipeline</code> resolver :)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>These are the 2 workspaces we want to handle with the "wrapper". In a gist, this means : for those 2 workspaces, using an oci image (a different one) for saving and pushing to it</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Which files to <em>compute the hash</em> from. The idea here is that, we will compute the hash, and try to fetch the content (using an oci image for now) tagged with that hash, if it doesn&#8217;t exists, we don&#8217;t fetch anything. <strong>But</strong> in any case, we&#8217;ll push an image tagged with that hash at the end.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Very similar with <code>tekton-wrap-pipeline</code>, it&#8217;s the <em>naming pattern</em> for the image we want to use to push the cache to/from</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This need to be implemented
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_customtask_explorations"><a class="anchor" href="#_customtask_explorations"></a><code>CustomTask</code> explorations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The idea is very similar to remote resolution, but using <a href="https://tekton.dev/docs/pipelines/customruns"><code>CustomTask</code></a> instead.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This need to be completed
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_though_on_a_built_in_api"><a class="anchor" href="#_though_on_a_built_in_api"></a>Though on a built-in API</h2>
+<div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This need to be completed
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>xx</p>
+</div>
+</div>
+</div>
+</article>
+        </main>
+            </div>
+  </div>
+</div><footer class="footer">
+  <p>Adapted from Antora default UI, (c) 2019</p>
+</footer>
+<script src="../../../_/js/site.js"></script>
+<script src="../../../_/js/vendor/highlight.js"></script>
+<script src="../../../_/js/tabsBehavior.js"></script>
+<script>hljs.initHighlighting()</script>
+  </body>
+</html>
