@@ -1,0 +1,7 @@
+= Overview
+
+IMPORTANT: This is an __nofficial__ documentation for OpenShift Pipelines maintained by the engineers working on the project. Please refer to the https://docs.openshift.com[Official documentation] for supported documentation.
+
+== Pipeline as code https://pipelinesascode.com/[➡]
+
+The upstream documentation for Pipeline as code is very good, so let's just go there: https://pipelinesascode.com/[pipelinesascode.com]
