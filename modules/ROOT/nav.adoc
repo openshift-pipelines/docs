@@ -5,6 +5,8 @@
 ** xref:pipeline:cache-in-tekton.adoc[Caches "support" in tekton pipelines]
 * Operator
 ** xref:operator:troubleshooting.adoc[Troubleshooting]
+** xref:operator:high-availability.adoc[High Availability for Tekton Pipelines Controller]
+** xref:operator:install-result.adoc[Installing Result]
 * Results
 ** xref:results:query-using-opc.adoc[Query Results Using OPC CLI]
 * Chains

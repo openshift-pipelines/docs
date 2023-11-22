@@ -3,3 +3,4 @@ static_files:
   - favicon.ico
   - .nojekyll
   - CNAME
+  - 404.html
