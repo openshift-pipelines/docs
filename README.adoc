@@ -9,7 +9,10 @@ engineers working on the project.
 
 == The Operator xref:operator:index.adoc[➡]
 
-- xref:operator:troubleshooting.adoc[Troubleshooting]
+- xref:modules/operator/pages/troubleshooting.adoc[Troubleshooting]
+- xref:modules/operator/pages/install-result.adoc[Installing Result]
+- xref:modules/operator/pages/high-availability.adoc[High Availability for Tekton Pipelines Controller on OpenShift Pipelines 1.10 and 1.11]
+- xref:modules/operator/pages/high-availability-1.12.adoc[High Availability for Tekton Pipelines Controller from OpenShift Pipelines 1.12]
 
 == Pipeline xref:pipeline:index.adoc[➡]
 

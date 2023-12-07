@@ -1,4 +1,4 @@
-= High Availability for Tekton Pipelines Controller
+= High Availability for Tekton Pipelines Controller on OpenShift Pipeline 1.10 and 1.11
 :toc: left
 :toclevels: 5
 :source-highlighter: rouge
