@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High Availability for Tekton Pipelines Controller on OpenShift Pipeline 1.10 and 1.11 :: Red Hat OpenShift Pipelines previews</title>
-    <link rel="canonical" href="https://docs.openshift-pipelines.org/docs/latest/operator/high-availability.html">
+    <title>High Availability for Tekton Pipelines Controller from OpenShift Pipelines 1.12 :: Red Hat OpenShift Pipelines previews</title>
+    <link rel="canonical" href="https://docs.openshift-pipelines.org/docs/latest/operator/high-availability-1.12.html">
     <meta name="generator" content="Antora 3.1.4">
     <link rel="stylesheet" href="../../../_/css/site.css">
 <link rel="stylesheet" href="../../../_/css/extra.css">
@@ -78,10 +78,10 @@
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="install-result.html">Installing Result</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="2">
+  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="high-availability.html">High Availability for Tekton Pipelines Controller on OpenShift Pipelines 1.10 and 1.11</a>
   </li>
-  <li class="nav-item" data-depth="2">
+  <li class="nav-item is-current-page" data-depth="2">
     <a class="nav-link" href="high-availability-1.12.html">High Availability for Tekton Pipelines Controller from OpenShift Pipelines 1.12</a>
   </li>
 </ul>
@@ -136,14 +136,14 @@
   <ul>
     <li class="crumb"><a href="../index.html">Documentation</a></li>
     <li class="crumb">Operator</li>
-    <li class="crumb"><a href="high-availability.html">High Availability for Tekton Pipelines Controller on OpenShift Pipelines 1.10 and 1.11</a></li>
+    <li class="crumb"><a href="high-availability-1.12.html">High Availability for Tekton Pipelines Controller from OpenShift Pipelines 1.12</a></li>
   </ul>
 </nav>
 </div>
     <div class="main-view-and-toc">
         <main class="main">
           <article class="doc">
-<h1>High Availability for Tekton Pipelines Controller on OpenShift Pipeline 1.10 and 1.11</h1>
+<h1>High Availability for Tekton Pipelines Controller from OpenShift Pipelines 1.12</h1>
 <div class="sect1">
 <h2 id="_high_availability_for_tekton_pipelines_controller"><a class="anchor" href="#_high_availability_for_tekton_pipelines_controller"></a>High Availability for Tekton Pipelines Controller</h2>
 <div class="sectionbody">
@@ -161,8 +161,7 @@ bucket.</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>NOTE</strong>: High Availability support for <code>tekton-pipelines-controller</code> has
-been added in <code>OpenShift Pipelines</code> from <code>v1.10.0</code> onwards.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>NOTE</strong>: This doc has been valid for <code>OpenShift Pipelines</code> from <code>v1.12.0</code> onwards.</p></td>
 </tr>
 </tbody>
 </table>
@@ -173,7 +172,9 @@ been added in <code>OpenShift Pipelines</code> from <code>v1.10.0</code> onwards
 <li>
 <p>First, specify the number of buckets across which you want to
 distribute workqueue. The maximum supported value for bucket is <code>10</code>.
-You need to update the <code>config</code> CR with the required number of buckets.</p>
+Also specify the number of replicas of tekton-pipelines-controller
+you need to share the workloads process by the controller.
+You need to update the <code>config</code> CR with the required number of buckets and replicas.</p>
 </li>
 </ol>
 </div>
@@ -195,82 +196,12 @@ spec:
         performance:
             disable-ha: false
             buckets: &lt; buckets required &gt;
+            replicas: &lt; replicas required &gt;
         &lt;&lt;---&gt;&gt;</code></pre>
 </div>
 </div>
 <div class="olist arabic">
 <ol class="arabic" start="2">
-<li>
-<p><strong>This step is only required for <code>OpenShift Pipelines</code> releases <code>1.10.x</code>
-and <code>1.11.0</code>. This is not required for <code>v1.11.1</code> onwards.</strong></p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>Now grab the list of all the tektoninstallerset available</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc get tektoninstallerset | grep pipeline-main-deployment
-
-pipeline-main-deployment-45m2s                   True</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Now edit the installerset which we got in previous command for removing
-one fields on tekton-pipelines-controller which is available in
-<code>spec.manifests</code> (This is required every time you do any change related
-to pipeline on tektonconfig)</p>
-</div>
-<div class="paragraph">
-<p>Remove the disable-ha flag in the args of container of
-tekton-pipelines-controller</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc edit tektoninstallerset pipeline-main-deployment-45m2s</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: operator.tekton.dev/v1alpha1
-kind: TektonInstallerSet
-metadata:
-    annotations:
-        operator.tekton.dev/target-namespace: openshift-pipelines
-spec:
-    manifests:
-    &lt;&lt;---&gt;&gt;
-    - apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-          name: tekton-pipelines-controller
-      spec:
-          template:
-              spec:
-                  containers:
-                  - args:
-                    &lt;&lt;---&gt;&gt;
-                    - -disable-ha
-                    - "false"            &lt;&lt;&lt;&lt; these two lines needs to be removed &gt;&gt;&gt;&gt;</code></pre>
-</div>
-</div>
-<div class="olist arabic">
-<ol class="arabic" start="3">
-<li>
-<p>Next step is to scale the <code>tekton-pipelines-controller</code> for having
-more replicas. (This is also recommended to not have more than 10
-replicas)</p>
-</li>
-</ol>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc -n openshift-pipelines scale deployment/tekton-pipelines-controller --replicas=&lt;no of replicas requires&gt;</code></pre>
-</div>
-</div>
-<div class="olist arabic">
-<ol class="arabic" start="4">
 <li>
 <p>Now delete the existing leases so that old replica removes hold and
 new leases gets created which get acquired by different replicas.</p>
@@ -297,12 +228,7 @@ by default getting used in knative controllers. So the change in data of
 this gets read by all other components too. It is fixed for
 pipelines-controller in
 <a href="https://issues.redhat.com/browse/SRVKP-3336">1.11.1</a> and for others in
-<a href="https://issues.redhat.com/browse/SRVKP-3377">1.12.0</a></p>
-</li>
-<li>
-<p>Need to modify
-tektoninstallerset (step 2) is a bug which is fixed in
-<a href="https://issues.redhat.com/browse/SRVKP-3335">1.11.1</a></p>
+<a href="https://issues.redhat.com/browse/SRVKP-3377">1.13.0</a></p>
 </li>
 </ul>
 </div>
@@ -312,20 +238,8 @@ tektoninstallerset (step 2) is a bug which is fixed in
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>First, scale down the <code>tekton-pipelines-controller</code> for replica <code>1</code></p>
-</li>
-</ol>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc -n openshift-pipelines scale deployment/tekton-pipelines-controller --replicas=1</code></pre>
-</div>
-</div>
-<div class="olist arabic">
-<ol class="arabic" start="2">
-<li>
-<p>Now remove the bucket field on the TektonConfig CR to remove the
-workqueue distribution</p>
+<p>Remove the bucket and replicas field on the TektonConfig CR to remove the
+workqueue distribution or set them both to 1</p>
 </li>
 </ol>
 </div>
@@ -350,7 +264,7 @@ spec:
 </div>
 </div>
 <div class="olist arabic">
-<ol class="arabic" start="3">
+<ol class="arabic" start="2">
 <li>
 <p>Next is to delete the dangling leases which were acquired previously
 by the replicas</p>
@@ -360,37 +274,6 @@ by the replicas</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc delete -n openshift-pipelines $(oc get leases -n openshift-pipelines -o name | grep tekton-pipelines-controller)</code></pre>
-</div>
-</div>
-<div class="olist arabic">
-<ol class="arabic" start="4">
-<li>
-<p>And to completely disable leader election and not creating leases for
-<code>tekton-pipelines-controller</code> pod, you can set <code>disable-ha</code> to <code>true</code> in
-TektonConfig CR (This is true in <code>OpenShift Pipelines</code> releases
-<code>v1.10.x</code> and <code>v1.11.0</code> because of
-<a href="https://issues.redhat.com/browse/SRVKP-3335">bug</a>)</p>
-</li>
-</ol>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc edit tektonconfig config</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: operator.tekton.dev/v1alpha1
-kind: TektonConfig
-metadata:
-    name: config
-spec:
-    &lt;&lt;---&gt;&gt;
-    pipeline:
-        &lt;&lt;---&gt;&gt;
-        performance:
-            disable-ha: true
-        &lt;&lt;---&gt;&gt;</code></pre>
 </div>
 </div>
 </div>
